@@ -1,0 +1,52 @@
+.pytest_cache/
+src/tests/__pycache__
+src/tests/.pytest_cache
+
+# Environnements virtuels
+venv/
+env/
+.venv/
+.env/
+
+# Fichiers de cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Rapports et résultats de tests
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Fichiers de configuration IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Fichiers de système
+.DS_Store
+Thumbs.db
+
+# Fichiers de log
+*.log
+
+# Fichiers de configuration locaux
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Fichiers temporaires
+*.swp
+*~
+
+# Fichiers de configuration spécifiques à pytest
+pytest.ini
