@@ -6,5 +6,6 @@
         "ms-python.debugpy",
         "rodolphebarbanneau.python-docstring-highlighter",
         "njqdev.vscode-python-typehint",
+        "charliermarsh.ruff"
     ]
 }
