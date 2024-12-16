@@ -1,11 +1,9 @@
 import numpy as np
-from typing import Union, Callable, TypeAlias
-
-UFunc: TypeAlias = Callable[[np.ndarray], np.ndarray]
+from .types import UFunc, ArrayLike
 
 class Angle:
 
-    def __init__(self, values: Union[float, list, np.ndarray], unit: str = "rad"):
+    def __init__(self, values: ArrayLike, unit: str = "rad"):
         """Initialize an angle or set of angles
 
         Args:
