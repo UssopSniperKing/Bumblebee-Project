@@ -1,11 +1,10 @@
 import numpy as np
 from .referentials import Referential
-from .types import ArrayLike, UFunc
+from .types import ArrayLike, UFunc, Scalar
 from typing import Optional
 
 
 class Vector3D:
-    
     def __init__(self, array: ArrayLike, referential: Referential):
         # check if we have a valid referential
         if isinstance(referential, Referential):
@@ -56,15 +55,22 @@ class Vector3D:
         else:
             raise ValueError("Invalid Referential")
 
-    def __mul__(self, scalar: float) -> "Vector3D":
+    def norm(self) -> np.ndarray:  # ? to be moved in a separate module for math functions ?
+        """Euclidian norm of each vector."""
+        return np.linalg.norm(self.coords, axis=0)
+
+    def __mul__(self, scalar: Scalar) -> "Vector3D":
         new_coords = self.coords * scalar
         return Vector3D(new_coords, self.referential)
 
-    def __sub__(self, vector: "Vector3D") -> "Vector3D":  # todo
-        pass
+    def __truediv__(self, scalar: Scalar) -> "Vector3D":
+        return Vector3D(self.coords / scalar, referential=self.referential)
 
-    def __add__(self, vector: "Vector3D") -> "Vector3D":  # todo
-        pass
+    def __sub__(self, vector: "Vector3D") -> "Vector3D":  # todo validate referential first
+        return Vector3D(self.coords - vector.coords, referential=self.referential)
+
+    def __add__(self, vector: "Vector3D") -> "Vector3D":  # todo validate referential first
+        return Vector3D(self.coords + vector.coords, referential=self.referential)
 
     def __repr__(self) -> str:
         return f"Vector3D(Coordinates=\n{self.coords}, referential={self.referential})"

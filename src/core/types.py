@@ -3,3 +3,4 @@ import numpy as np
 
 ArrayLike: TypeAlias = Union[np.ndarray, list, tuple]
 UFunc: TypeAlias = Callable[[np.ndarray], np.ndarray]
+Scalar: TypeAlias = Union[int, float]
