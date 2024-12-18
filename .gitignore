@@ -29,6 +29,7 @@ coverage.xml
 .idea/
 *.sublime-project
 *.sublime-workspace
+extensions.json
 
 # Fichiers de système
 .DS_Store
