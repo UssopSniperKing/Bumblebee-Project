@@ -1,5 +1,5 @@
 
-def bumblebee_kinematics_model(time=None, PHI=115.0, phi_m=24.0, dTau=0.00, alpha_down=70.0, alpha_up=-40.0, tau=0.22, theta=12.55/2):
+def bumblebee_kinematics_model(PHI=115.0, phi_m=24.0, dTau=0.00, alpha_down=70.0, alpha_up=-40.0, tau=0.22, theta=12.55/2):
     """
     Kinematics model for a bumblebee bombus terrestris [Engels et al PRL 2016, PRF 2019]
 
@@ -23,8 +23,6 @@ def bumblebee_kinematics_model(time=None, PHI=115.0, phi_m=24.0, dTau=0.00, alph
         duration of wing rotation
     theta : 
         constant deviation angle_rad (deg)
-    time : vector of time
-        Time vector
     
 
     Returns

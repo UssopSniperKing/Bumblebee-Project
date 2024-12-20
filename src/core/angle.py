@@ -40,6 +40,19 @@ class Angle:
             return np.degrees(self.values)
         else:
             return self.values
+    
+    def set_unit(self, unit: str) -> None: # todo : add tests
+        """Set the unit of the angles.
+
+        Parameters:
+            unit (str): Unit to set ("rad" or "deg").
+        """
+        if unit not in {"rad", "deg"}:
+            raise ValueError("Angle unit must be 'deg' or 'rad'.")
+
+        if self.unit != unit:
+            self.values = self.radians if unit == "rad" else self.degrees
+            self.unit = unit
 
     def apply(self, func: UFunc) -> "Angle":
         """Apply a function on the angles (in radians).
@@ -70,3 +83,7 @@ class Angle:
             return Angle(result_values, unit="rad")
         else:
             raise ValueError("You can only substract angles to angles.")
+    
+    def __len__(self) -> int:
+        """Return the number of angles."""
+        return len(self.values)

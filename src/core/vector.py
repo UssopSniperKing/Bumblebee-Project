@@ -55,21 +55,46 @@ class Vector3D:
         else:
             raise ValueError("Invalid Referential")
 
-    def norm(self) -> np.ndarray:  # ? to be moved in a separate module for math functions ?
+    def norm(self) -> np.ndarray:
         """Euclidian norm of each vector."""
         return np.linalg.norm(self.coords, axis=0)
 
     def __mul__(self, scalar: Scalar) -> "Vector3D":
+
+        if scalar.type is not int and scalar.type is not float:
+            raise ValueError("Invalid scalar type.")
+
         new_coords = self.coords * scalar
         return Vector3D(new_coords, self.referential)
 
     def __truediv__(self, scalar: Scalar) -> "Vector3D":
+
+        if scalar.type is not int and scalar.type is not float:
+            raise ValueError("Invalid scalar type.")
+
+        if scalar == 0:
+            raise ValueError("Division by zero.")
+
         return Vector3D(self.coords / scalar, referential=self.referential)
 
-    def __sub__(self, vector: "Vector3D") -> "Vector3D":  # todo validate referential first
+    def __sub__(self, vector: "Vector3D") -> "Vector3D":
+
+        if isinstance(vector, Vector3D):
+            raise ValueError("Invalid vector type.")
+
+        if self.referential != vector.referential:
+            raise ValueError("Referentials mismatch.")
+
         return Vector3D(self.coords - vector.coords, referential=self.referential)
 
-    def __add__(self, vector: "Vector3D") -> "Vector3D":  # todo validate referential first
+    def __add__(self, vector: "Vector3D") -> "Vector3D":
+
+        if isinstance(vector, Vector3D):
+            raise ValueError("Invalid vector type.")
+
+        if self.referential != vector.referential:  
+            raise ValueError("Referentials mismatch.")
+
         return Vector3D(self.coords + vector.coords, referential=self.referential)
 
     def __repr__(self) -> str:
