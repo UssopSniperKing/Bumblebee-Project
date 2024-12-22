@@ -101,13 +101,178 @@ def get_rotation_matrix_x(angle: Angle) -> np.ndarray:  # todo : add tests
     return rotation_matrices # return the rotation matrix of shape (3,3,N)
 
 
-def wing_to_global_matrix() -> np.ndarray: # todo : use einsum to multiply the rotation matrices (need to understand einsum first)
-    pass
+def stroke_to_wing_matrix(phi: Angle, alpha: Angle, theta: Angle) -> np.ndarray:
+    """Get the rotation matrix from the stroke referential to the wing referential.
+    Computes the rotation matrix as Ry(alpha) @ Rz(theta) @ Rx(phi).
+
+    Args:
+        phi (Angle): Rotation around the x-axis.
+        alpha (Angle): Rotation around the y-axis.
+        theta (Angle): Rotation around the z-axis.
+    
+    Raises:
+        ValueError: If the angles are not Angle objects or if the angles arrays are not of the same length.
+    
+    Returns:
+        np.ndarray: Rotation matrix of shape (3,3) or (3,3,N) depending on the number of angles.
+    """
+
+    # check if the angles are Angle objects
+    for argument, name in [(phi, "phi"), (alpha, "alpha"), (theta, "theta")]:
+        if not isinstance(argument, Angle):
+            raise ValueError(f"{name} must be an Angle object")
+    
+    # check if the angles are of length 1 or same length
+    lengths = [len(angle) for angle in (phi, alpha, theta)]
+    max_len = max(lengths)
+
+    if not all(length in (1, max_len) for length in lengths):
+        raise ValueError("Angle arrays must either be of length 1 or same length")
+    
+    # broadcast the angles to the same length
+    def broadcast_to_max_len(angle: Angle) -> np.ndarray:
+        return np.broadcast_to(angle, (max_len,))
+
+    phi_broadcasted = phi.apply(broadcast_to_max_len)
+    alpha_broadcasted = alpha.apply(broadcast_to_max_len)
+    theta_broadcasted = theta.apply(broadcast_to_max_len)
+
+    # get the rotation matrices, at this point all matrices are of shape (3,3,max_len) 
+    # and max_len is either 1 or the length of the angles
+    Rx = get_rotation_matrix_x(phi_broadcasted)
+    Ry = get_rotation_matrix_y(alpha_broadcasted)
+    Rz = get_rotation_matrix_z(theta_broadcasted)
+
+    if max_len == 1:
+        output_matrix = Ry @ Rz @ Rx
+    else:
+        output_matrix = np.empty((3, 3, max_len))
+
+        for i in range(max_len): # ? use np.einsum maybe it's faster
+            output_matrix[:, :, i] = Ry[:, :, i] @ Rz[:, :, i] @ Rx[:, :, i]
+
+    
+    return output_matrix
 
 
-def body_to_wing_matrix() -> np.ndarray:
-    pass
+def global_to_body_matrix(psi: Angle, beta: Angle, gamma: Angle) -> np.ndarray:
+    """Get the rotation matrix from the global referential to the body referential.
+    Computes the rotation matrix as Rx(psi) @ Ry(beta) @ Rz(gamma).
+
+    Args:
+        psi (Angle): Rotation around the x-axis.
+        beta (Angle): Rotation around the y-axis.
+        gamma (Angle): Rotation around the z-axis.
+    
+    Raises:
+        ValueError: If the angles are not Angle objects or if the angles arrays are not of the same length.
+    
+    Returns:
+        np.ndarray: Rotation matrix of shape (3,3) or (3,3,N) depending on the number of angles.
+    """
+
+    # check if the angles are Angle objects
+    for argument, name in [(psi, "psi"), (beta, "beta"), (gamma, "gamma")]:
+        if not isinstance(argument, Angle):
+            raise ValueError(f"{name} must be an Angle object")
+    
+    # check if the angles are of length 1 or same length
+    lengths = [len(angle) for angle in (psi, beta, gamma)]
+    max_len = max(lengths)
+
+    if not all(length in (1, max_len) for length in lengths):
+        raise ValueError("Angle arrays must either be of length 1 or same length")
+    
+    # broadcast the angles to the same length
+    def broadcast_to_max_len(angle: Angle) -> np.ndarray:
+        return np.broadcast_to(angle, (max_len,))
+    
+    psi_broadcasted = psi.apply(broadcast_to_max_len)
+    beta_broadcasted = beta.apply(broadcast_to_max_len)
+    gamma_broadcasted = gamma.apply(broadcast_to_max_len)
+
+    # get the rotation matrices, at this point all matrices are of shape (3,3,max_len)
+    # and max_len is either 1 or the length of the angles
+    Rx = get_rotation_matrix_x(psi_broadcasted)
+    Ry = get_rotation_matrix_y(beta_broadcasted)
+    Rz = get_rotation_matrix_z(gamma_broadcasted)
+
+    if max_len == 1:
+        output_matrix = Rx @ Ry @ Rz
+    else:
+        output_matrix = np.empty((3, 3, max_len))
+
+        for i in range(max_len): # ? use np.einsum maybe it's faster
+            output_matrix[:, :, i] = Rx[:, :, i] @ Ry[:, :, i] @ Rz[:, :, i]
+    
+    return output_matrix
 
 
-def stroke_to_body_matrix() -> np.ndarray:
-    pass
+def global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma) -> np.ndarray:
+    """Get the rotation matrix from the global referential to the wing referential.
+    Computes the rotation matrix as R_s2w @ R_b2s @ R_g2b.
+
+    Args:
+        phi (Angle): Rotation around the x-axis in the stroke referential.
+        alpha (Angle): Rotation around the y-axis in the stroke referential.
+        theta (Angle): Rotation around the z-axis in the stroke referential.
+        eta (Angle): Rotation around the y-axis in the body referential.
+        psi (Angle): Rotation around the x-axis in the body referential.
+        beta (Angle): Rotation around the y-axis in the body referential.
+        gamma (Angle): Rotation around the z-axis in the body referential.
+    
+    Raises:
+        ValueError: If the angles are not Angle objects or if the angles arrays are not of the same length.
+
+    Returns:
+        np.ndarray: Rotation matrix of shape (3,3) or (3,3,N) depending on the number of angles.
+    """
+
+    # check if the angles are Angle objects
+    for argument, name in [
+        (phi, "phi"),
+        (alpha, "alpha"),
+        (theta, "theta"),
+        (eta, "eta"),
+        (psi, "psi"),
+        (beta, "beta"),
+        (gamma, "gamma"),
+    ]:
+        if not isinstance(argument, Angle):
+            raise ValueError(f"{name} must be an Angle object")
+    
+    # check if the angles are of length 1 or same length
+    lengths = [len(angle) for angle in (phi, alpha, theta, eta, psi, beta, gamma)]
+    max_len = max(lengths)
+
+    if not all(length in (1, max_len) for length in lengths):
+        raise ValueError("Angle arrays must either be of length 1 or same length")
+
+    # broadcast the angles to the same length
+    def broadcast_to_max_len(angle: Angle) -> np.ndarray:
+        return np.broadcast_to(angle, (max_len,))
+
+    phi_broadcasted = phi.apply(broadcast_to_max_len)
+    alpha_broadcasted = alpha.apply(broadcast_to_max_len)
+    theta_broadcasted = theta.apply(broadcast_to_max_len)
+    eta_broadcasted = eta.apply(broadcast_to_max_len)
+    psi_broadcasted = psi.apply(broadcast_to_max_len)
+    beta_broadcasted = beta.apply(broadcast_to_max_len)
+    gamma_broadcasted = gamma.apply(broadcast_to_max_len)
+
+    # get the rotation matrices, at this point all matrices are of shape (3,3,max_len)
+    # and max_len is either 1 or the length of the angles
+    R_s2w = stroke_to_wing_matrix(phi_broadcasted, alpha_broadcasted, theta_broadcasted)
+    R_g2b = global_to_body_matrix(psi_broadcasted, beta_broadcasted, gamma_broadcasted)
+    R_b2s = get_rotation_matrix_y(eta_broadcasted)
+
+    if max_len == 1:
+        output_matrix = R_s2w @ R_b2s @ R_g2b
+    else:
+        output_matrix = np.empty((3, 3, max_len))
+
+        for i in range(max_len): # ? use np.einsum maybe it's faster
+            output_matrix[:, :, i] = R_s2w[:, :, i] @ R_b2s[:, :, i] @ R_g2b[:, :, i]
+    
+    return output_matrix
+    

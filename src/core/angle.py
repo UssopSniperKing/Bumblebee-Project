@@ -3,43 +3,44 @@ from .types import UFunc, ArrayLike
 
 
 class Angle:
-    def __init__(self, values: ArrayLike, unit: str = "rad"):
-        """Initialize an angle or set of angles
+    def __init__(self, values: ArrayLike, unit: str):
+        """Initialize an angle or set of angles of shape (N,).
 
         Args:
             values (Union[float, list, np.ndarray]): Angles values (scalar or array)
-            unit (str, optional): Angle unit "rad" or "deg". Defaults to "rad".
+            unit (str, optional): Angle unit "rad" or "deg"
         """
 
         if unit not in {"rad", "deg"}:
             raise ValueError("Angle unit must be 'deg' or 'rad'.")
 
-        self.values = np.asarray(values, dtype=np.float64)
-        self.unit = unit
+        self._values = np.asarray(values, dtype=np.float64)
+        self._values.reshape(-1) # ensure we have a 1D array of shape (N,)
+        self._unit = unit
 
     @property
     def radians(self) -> np.ndarray:
-        """Give the angles in radians.
+        """Give the angles in radians. Shape (N,).
 
         Returns:
             np.ndarray: Angles in radians
         """
-        if self.unit == "deg":
-            return np.radians(self.values)
+        if self._unit == "deg":
+            return np.radians(self._values)
         else:
-            return self.values
+            return self._values
 
     @property
     def degrees(self) -> np.ndarray:
-        """Give the angles in degrees.
+        """Give the angles in degrees. Shape (N,).
 
         Returns:
             np.ndarray: Angles in degrees
         """
-        if self.unit == "rad":
-            return np.degrees(self.values)
+        if self._unit == "rad":
+            return np.degrees(self._values)
         else:
-            return self.values
+            return self._values
     
     def set_unit(self, unit: str) -> None: # todo : add tests
         """Set the unit of the angles.
@@ -50,9 +51,9 @@ class Angle:
         if unit not in {"rad", "deg"}:
             raise ValueError("Angle unit must be 'deg' or 'rad'.")
 
-        if self.unit != unit:
-            self.values = self.radians if unit == "rad" else self.degrees
-            self.unit = unit
+        if self._unit != unit:
+            self._values = self.radians if unit == "rad" else self.degrees
+            self._unit = unit
 
     def apply(self, func: UFunc) -> "Angle":
         """Apply a function on the angles (in radians).
@@ -67,8 +68,7 @@ class Angle:
         return Angle(transformed_values, unit="rad")
 
     def __repr__(self):
-        unit = "rad" if self.unit == "rad" else "deg"
-        return f"Angle(values={self.values}, unit='{unit}')"
+        return f"Angle(values={self._values}, unit='{self._unit}')"
 
     def __add__(self, angle: "Angle") -> "Angle":
         if isinstance(angle, Angle):
@@ -86,4 +86,4 @@ class Angle:
     
     def __len__(self) -> int:
         """Return the number of angles."""
-        return len(self.values)
+        return len(self._values)

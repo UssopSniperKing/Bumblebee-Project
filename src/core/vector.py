@@ -1,7 +1,7 @@
 import numpy as np
 from .referentials import Referential
 from .types import ArrayLike, UFunc, Scalar
-from typing import Optional
+from .transformations import Transformations
 
 
 class Vector3D:
@@ -49,11 +49,20 @@ class Vector3D:
         return self._referential
 
     @referential.setter
-    def referential(self, new_referential: Optional[Referential]) -> None:
-        if isinstance(new_referential, Referential):
-            self._referential = new_referential
-        else:
+    def to_referential(self, new_referential: Referential) -> None:
+        if not isinstance(new_referential, Referential):
             raise ValueError("Invalid Referential")
+        
+        if not Transformations._is_initialized:
+            raise ValueError("Transformations must be initialized first.")
+        
+        if new_referential == self.referential:
+            return None
+
+        transformation_matrix = Transformations.get_matrix(self.referential, new_referential)
+
+        pass # todo : apply the transformation matrix to the coords or call a function that does it
+            
 
     def norm(self) -> np.ndarray:
         """Euclidian norm of each vector."""
