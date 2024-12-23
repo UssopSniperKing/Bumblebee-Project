@@ -1,7 +1,6 @@
 import numpy as np
-from .referentials import Referential
+from .referentials import Referential, Transformations
 from .types import ArrayLike, UFunc, Scalar
-from .transformations import Transformations
 
 
 class Vector3D:
@@ -70,7 +69,7 @@ class Vector3D:
 
     def __mul__(self, scalar: Scalar) -> "Vector3D":
 
-        if scalar.type is not int and scalar.type is not float:
+        if type(scalar) is not int and type(scalar) is not float:
             raise ValueError("Invalid scalar type.")
 
         new_coords = self.coords * scalar
@@ -78,7 +77,7 @@ class Vector3D:
 
     def __truediv__(self, scalar: Scalar) -> "Vector3D":
 
-        if scalar.type is not int and scalar.type is not float:
+        if type(scalar) is not int and type(scalar) is not float:
             raise ValueError("Invalid scalar type.")
 
         if scalar == 0:
@@ -88,7 +87,7 @@ class Vector3D:
 
     def __sub__(self, vector: "Vector3D") -> "Vector3D":
 
-        if isinstance(vector, Vector3D):
+        if not isinstance(vector, Vector3D):
             raise ValueError("Invalid vector type.")
 
         if self.referential != vector.referential:
@@ -98,7 +97,7 @@ class Vector3D:
 
     def __add__(self, vector: "Vector3D") -> "Vector3D":
 
-        if isinstance(vector, Vector3D):
+        if not isinstance(vector, Vector3D):
             raise ValueError("Invalid vector type.")
 
         if self.referential != vector.referential:  
@@ -133,5 +132,5 @@ class Vector3D:
         coords = [arg.coords if isinstance(arg, Vector3D) else arg for arg in inputs]
         result = getattr(ufunc, method)(*coords, **kwargs)
         if isinstance(result, np.ndarray) and result.ndim >= 2 and result.shape[0] == 3:
-            return Vector3D(result, frame=self.frame)
+            return Vector3D(result, referential=self.referential)
         return result

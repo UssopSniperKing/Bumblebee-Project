@@ -98,6 +98,9 @@ def normalize(u: Vector3D) -> Vector3D:  # todo : add tests
     if not isinstance(u, Vector3D):
         raise ValueError("u, v must be a Vector3D object.")
 
-    vec_coords = u.coords / u.norm()
-
+    try: 
+        vec_coords = u.coords / u.norm()
+    except ZeroDivisionError: 
+        raise ValueError("Division par zéro")
+        
     return Vector3D(vec_coords, u.referential)

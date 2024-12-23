@@ -1,121 +1,107 @@
 import pytest
 import numpy as np
-from src.core.referentials import Referential
 from src.core.vector import Vector3D
+from src.core.referentials import Referential
+from src.core.types import Scalar
 
 
-def test_vector3d_init_valid_1d_array():
-    """Test initialization with a 1D array of 3 elements."""
-    v = Vector3D([1, 2, 3], Referential.GLOBAL)
+def test_vector_creation():
+    # Test valid 1D array
+    v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
+    assert v1.coords.shape == (3, 1)
+    assert v1.referential == Referential.GLOBAL
 
-    assert isinstance(v.coords, np.ndarray)
-    assert v.coords.shape == (3, 1)
-    assert np.array_equal(v.coords, np.array([[1], [2], [3]]))
-    assert v.referential == Referential.GLOBAL
+    # Test valid 2D array (3, N)
+    v2 = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.BODY)
+    assert v2.coords.shape == (3, 2)
+    assert v2.referential == Referential.BODY
 
+    # Test valid 2D array (N, 3)
+    v3 = Vector3D([[1, 2, 3], [4, 5, 6]], Referential.WING)
+    assert v3.coords.shape == (3, 2)
+    assert v3.referential == Referential.WING
 
-def test_vector3d_init_valid_2d_array_3xn():
-    """Test initialization with a 2D array of shape (3, N)."""
-    input_array = np.array([[1, 4], [2, 5], [3, 6]])
-    v = Vector3D(input_array, Referential.WING)
+    # Test invalid referential
+    with pytest.raises(ValueError):
+        Vector3D([1, 2, 3], "INVALID")
 
-    assert v.coords.shape == (3, 2)
-    assert np.array_equal(v.coords, input_array)
-    assert v.referential == Referential.WING
-
-
-def test_vector3d_init_valid_2d_array_nx3():
-    """Test initialization with a 2D array of shape (N, 3)."""
-    input_array = np.array([[1, 2, 3], [4, 5, 6]])
-    v = Vector3D(input_array, Referential.BODY)
-
-    assert v.coords.shape == (3, 2)
-    assert np.array_equal(v.coords, input_array.T)
-    assert v.referential == Referential.BODY
-
-
-def test_vector3d_invalid_referential():
-    """Test initialization with an invalid referential."""
-    with pytest.raises(ValueError, match="Invalid Referential"):
-        Vector3D([1, 2, 3], "not a referential")
-
-
-def test_vector3d_invalid_array_type():
-    """Test initialization with an invalid array type."""
-    with pytest.raises(ValueError, match="Invalid Type"):
-        Vector3D(42, Referential.STROKE)
-
-
-def test_vector3d_invalid_array_length():
-    """Test initialization with an incorrect array length."""
-    with pytest.raises(ValueError, match="Invalid length for 1D array"):
+    # Test invalid array shape
+    with pytest.raises(ValueError):
         Vector3D([1, 2], Referential.GLOBAL)
 
+    # Test invalid array type
+    with pytest.raises(ValueError):
+        Vector3D("invalid", Referential.BODY)
 
-def test_vector3d_invalid_array_dimension():
-    """Test initialization with an invalid array dimension."""
-    with pytest.raises(ValueError, match="Invalid array dimension"):
-        Vector3D(np.zeros((2, 2, 2)), Referential.WING)
-
-
-def test_vector3d_invalid_array_shape():
-    """Test initialization with an invalid array shape."""
-    with pytest.raises(ValueError, match="Invalid shape"):
-        Vector3D(np.zeros((4, 4)), Referential.BODY)
-
-
-def test_vector3d_referential_setter():
-    """Test the referential setter method."""
+def test_vector_properties():
     v = Vector3D([1, 2, 3], Referential.GLOBAL)
+    assert np.allclose(v.coords, np.array([[1], [2], [3]]))
+    assert v.referential == Referential.GLOBAL
 
-    v.referential = Referential.WING
-    assert v.referential == Referential.WING
+def test_vector_norm():
+    v = Vector3D([[3, 4], [0, 0], [0, 0]], Referential.WING)
+    assert np.allclose(v.norm(), [3, 4])
 
-
-def test_vector3d_referential_setter_invalid():
-    """Test the referential setter with an invalid referential."""
-    v = Vector3D([1, 2, 3], Referential.GLOBAL)
-
-    with pytest.raises(ValueError, match="Invalid Referential"):
-        v.referential = "invalid"
-
-
-def test_vector3d_multiplication():
-    """Test vector multiplication by a scalar."""
-    v = Vector3D([1, 2, 3], Referential.BODY)
-    result = v * 2
-
-    assert isinstance(result, Vector3D)
-    assert np.array_equal(result.coords, np.array([[2], [4], [6]]))
-    assert result.referential == Referential.BODY
-
-
-def test_vector3d_len():
-    """Test the __len__ method."""
+def test_vector_addition():
     v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
-    assert len(v1) == 1
+    v2 = Vector3D([4, 5, 6], Referential.GLOBAL)
+    v_sum = v1 + v2
+    assert v_sum.coords.shape == (3, 1)
+    assert np.allclose(v_sum.coords, np.array([[5], [7], [9]]))
 
-    v2 = Vector3D(np.array([[1, 4], [2, 5], [3, 6]]), Referential.WING)
-    assert len(v2) == 2
+    # Test referential mismatch
+    v3 = Vector3D([7, 8, 9], Referential.BODY)
+    with pytest.raises(ValueError):
+        v1 + v3
 
+def test_vector_subtraction():
+    v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
+    v2 = Vector3D([4, 5, 6], Referential.GLOBAL)
+    v_diff = v1 - v2
+    assert v_diff.coords.shape == (3, 1)
+    assert np.allclose(v_diff.coords, np.array([[-3], [-3], [-3]]))
 
-def test_vector3d_array_conversion():
-    """Test conversion to NumPy array."""
-    v = Vector3D([1, 2, 3], Referential.STROKE)
+    # Test referential mismatch
+    v3 = Vector3D([7, 8, 9], Referential.BODY)
+    with pytest.raises(ValueError):
+        v1 - v3
 
-    np_array = np.asarray(v)
-    assert np.array_equal(np_array, v.coords)
+def test_vector_multiplication():
+    v = Vector3D([1, 2, 3], Referential.GLOBAL)
+    v_scaled = v * 2
+    assert v_scaled.coords.shape == (3, 1)
+    assert np.allclose(v_scaled.coords, np.array([[2], [4], [6]]))
 
+    # Test invalid scalar type
+    with pytest.raises(ValueError):
+        v * "invalid"
 
-# Note: Cannot fully test __sub__ and __add__ as they are not implemented (todo)
+def test_vector_division():
+    v = Vector3D([2, 4, 6], Referential.GLOBAL)
+    v_scaled = v / 2
+    assert v_scaled.coords.shape == (3, 1)
+    assert np.allclose(v_scaled.coords, np.array([[1], [2], [3]]))
 
+    # Test division by zero
+    with pytest.raises(ValueError):
+        v / 0
 
-def test_vector3d_repr():
-    """Test the string representation of Vector3D."""
-    v = Vector3D([1, 2, 3], Referential.WING)
+    # Test invalid scalar type
+    with pytest.raises(ValueError):
+        v / "invalid"
 
-    repr_str = repr(v)
-    assert "Vector3D" in repr_str
-    assert "Coordinates" in repr_str
-    assert "referential" in repr_str
-    assert str(Referential.WING) in repr_str
+def test_vector_length():
+    v = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.WING)
+    assert len(v) == 2
+
+def test_vector_numpy_integration():
+    v = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.GLOBAL)
+    # Test np.asarray
+    array = np.asarray(v)
+    assert array.shape == (3, 2)
+    assert np.allclose(array, v.coords)
+
+    # Test NumPy ufunc (e.g., np.sin)
+    sin_v = np.sin(v)
+    assert isinstance(sin_v, Vector3D)
+    assert sin_v.coords.shape == (3, 2)

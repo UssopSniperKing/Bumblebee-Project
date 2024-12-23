@@ -1,5 +1,5 @@
 import numpy as np
-from angle import Angle
+from .angle import Angle
 
 def get_rotation_matrix_z(angle: Angle) -> np.ndarray: # todo : add tests
     """Get the rotation matrix around the z-axis. If multiple angles are given, 
