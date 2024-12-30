@@ -41,14 +41,38 @@ class Vector3D:
 
     @property
     def coords(self) -> np.ndarray:
+        """Coordinates of the vector.
+
+        Returns:
+            np.ndarray: Array of coordinates.
+        """
         return self._coords
 
     @property
     def referential(self) -> Referential:
+        """Referential of the vector.
+
+        Returns:
+            Referential: Referential object.
+        """
         return self._referential
 
     @referential.setter
-    def to_referential(self, new_referential: Referential) -> None:
+    def to_referential(self, new_referential: Referential) -> None: # todo : add tests
+        """Change the referential of the vector by applying the corresponding transformation matrix.
+
+        Parameters:
+            new_referential (Referential): The new referential desired.
+        
+        Raises:
+            ValueError: If the new referential is not a Referential object.
+            ValueError: If the transformations are not initialized.
+            ValueError: If the transformation matrix shape is invalid.
+        
+        Returns:    
+            None
+        """
+
         if not isinstance(new_referential, Referential):
             raise ValueError("Invalid Referential")
         
@@ -60,15 +84,35 @@ class Vector3D:
 
         transformation_matrix = Transformations.get_matrix(self.referential, new_referential)
 
-        pass # todo : apply the transformation matrix to the coords or call a function that does it
-            
+        # shape check: (3,3) or (3,3,N) with N = len(self)
+        if transformation_matrix.shape == (3, 3): # If we have a single transformation matrix apply it to every vector
+
+            self.coords = np.einsum("ij,jk->ik", transformation_matrix, self.coords)
+            self._referential = new_referential
+
+        elif transformation_matrix.shape[2] != len(self):
+            raise ValueError("Invalid transformation matrix shape. Expected (3,3) or (3,3,N), N must be equal to the number of vectors.")           
+        
+        self.coords = np.einsum("ijk,jk->ik", transformation_matrix, self.coords)
+        self._referential = new_referential    
 
     def norm(self) -> np.ndarray:
-        """Euclidian norm of each vector."""
+        """Euclidian norm of each vector.
+        
+        Returns:
+            np.ndarray: Array of scalars.
+        """
         return np.linalg.norm(self.coords, axis=0)
 
     def __mul__(self, scalar: Scalar) -> "Vector3D":
+        """Multiplication of a vector by a scalar.
 
+        Parameters:
+            scalar (Scalar): Scalar to multiply the vector by.
+        
+        Returns:
+            Vector3D: New vector.
+        """
         if type(scalar) is not int and type(scalar) is not float:
             raise ValueError("Invalid scalar type.")
 
@@ -76,7 +120,14 @@ class Vector3D:
         return Vector3D(new_coords, self.referential)
 
     def __truediv__(self, scalar: Scalar) -> "Vector3D":
+        """Division of a vector by a scalar.
 
+        Parameters:
+            scalar (Scalar): Scalar to divide the vector by.
+        
+        Returns:
+            Vector3D: New vector.
+        """
         if type(scalar) is not int and type(scalar) is not float:
             raise ValueError("Invalid scalar type.")
 
@@ -86,7 +137,14 @@ class Vector3D:
         return Vector3D(self.coords / scalar, referential=self.referential)
 
     def __sub__(self, vector: "Vector3D") -> "Vector3D":
+        """Substraction of two vectors.
 
+        Parameters:
+            vector (Vector3D): Vector to substract.
+
+        Returns:
+            Vector3D: New vector.
+        """
         if not isinstance(vector, Vector3D):
             raise ValueError("Invalid vector type.")
 
@@ -96,6 +154,14 @@ class Vector3D:
         return Vector3D(self.coords - vector.coords, referential=self.referential)
 
     def __add__(self, vector: "Vector3D") -> "Vector3D":
+        """Addition of two vectors.
+
+        Parameters:
+            vector (Vector3D): Vector to add.
+        
+        Returns:
+            Vector3D: New vector.
+        """
 
         if not isinstance(vector, Vector3D):
             raise ValueError("Invalid vector type.")
@@ -106,15 +172,29 @@ class Vector3D:
         return Vector3D(self.coords + vector.coords, referential=self.referential)
 
     def __repr__(self) -> str:
+        """Representation of the vector.
+
+        Returns:
+            str: Vector representation.
+        """
         return f"Vector3D(Coordinates=\n{self.coords}, referential={self.referential})"
 
     def __len__(self) -> int:
-        """Number N of vectors in the array (3, N)."""
+        """Number N of vectors in the array (3, N).
+        
+        Returns:
+            int: Number of vectors.
+        """
         return self.coords.shape[1]
 
     def __array__(self, dtype: type = None) -> np.ndarray:
-        """
-        Support for np.asarray().
+        """Support for np.asarray().
+
+        Parameters:
+            dtype (type): Data type of the array.
+        
+        Returns:
+            np.ndarray: Array of coordinates.
         """
         return self.coords if dtype is None else self.coords.astype(dtype)
 

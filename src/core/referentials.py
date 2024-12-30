@@ -4,10 +4,10 @@ from .angle import Angle
 from .transform_func import (
     stroke_to_wing_matrix,
     global_to_body_matrix,
-    global_to_wing_matrix
+    global_to_wing_matrix,
+    get_rotation_matrix_y,
+    transpose
 )
-from .transform_func import get_rotation_matrix_y as body_to_stroke_matrix # enhance clarity
-
 
 
 class Referential(Enum):
@@ -47,7 +47,7 @@ class Transformations:  # todo : add tests
             (Referential.STROKE, Referential.WING): stroke_to_wing_matrix(phi, alpha, theta),
             (Referential.GLOBAL, Referential.BODY): global_to_body_matrix(psi, beta, gamma),
             (Referential.GLOBAL, Referential.WING): global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma),
-            (Referential.BODY, Referential.STROKE): body_to_stroke_matrix(eta)
+            (Referential.BODY, Referential.STROKE): get_rotation_matrix_y(eta)
         }
         Transformations._is_initialized = True
 
@@ -71,7 +71,7 @@ class Transformations:  # todo : add tests
         if (source, target) not in Transformations._transformations:
 
             if (target, source) in Transformations._transformations:
-                return Transformations._transformations[(target, source)].T # todo : check if the transpose is the right way to do it for shapes (3,3,N)
+                return transpose(Transformations._transformations[(target, source)]) # todo : add tests
             else:
                 raise ValueError("Transformation not available.")
 

@@ -1,9 +1,6 @@
 import pytest
 import numpy as np
-from src.core.vector import Vector3D
-from src.core.referentials import Referential
-from src.core.types import Scalar
-
+from src.core import Vector3D, Referential
 
 def test_vector_creation():
     # Test valid 1D array

@@ -1,7 +1,7 @@
 import numpy as np
 from .angle import Angle
 
-def get_rotation_matrix_z(angle: Angle) -> np.ndarray: # todo : add tests
+def get_rotation_matrix_z(angle: Angle) -> np.ndarray:
     """Get the rotation matrix around the z-axis. If multiple angles are given, 
     the function returns a (3,3,N) array of rotation matrices.
 
@@ -35,7 +35,7 @@ def get_rotation_matrix_z(angle: Angle) -> np.ndarray: # todo : add tests
          
 
 
-def get_rotation_matrix_y(angle: Angle) -> np.ndarray:  # todo : add tests
+def get_rotation_matrix_y(angle: Angle) -> np.ndarray:
     """Get the rotation matrix around the y-axis. If multiple angles are given, 
     the function returns a (3,3,N) array of rotation matrices.
 
@@ -68,7 +68,7 @@ def get_rotation_matrix_y(angle: Angle) -> np.ndarray:  # todo : add tests
     return rotation_matrices # return the rotation matrix of shape (3,3,N)
 
 
-def get_rotation_matrix_x(angle: Angle) -> np.ndarray:  # todo : add tests
+def get_rotation_matrix_x(angle: Angle) -> np.ndarray:
     """Get the rotation matrix around the x-axis. If multiple angles are given, 
     the function returns a (3,3,N) array of rotation matrices.
 
@@ -275,4 +275,24 @@ def global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma) -> np.ndarra
             output_matrix[:, :, i] = R_s2w[:, :, i] @ R_b2s[:, :, i] @ R_g2b[:, :, i]
     
     return output_matrix
-    
+
+
+def transpose(matrix: np.ndarray) -> np.ndarray: # todo : add tests
+    """Transpose the input matrix. If the input matrix is of shape (3,3,N), the function
+    returns a matrix of shape (3,3,N).
+
+    Args:
+        matrix (np.ndarray): Input matrix of shape (3,3) or (3,3,N).
+
+    Raises:
+        ValueError: If the input matrix is not of shape (3,3) or (3,3,N).
+
+    Returns:
+        np.ndarray: Transposed matrix of shape (3,3) or (3,3,N).
+    """
+    if matrix.shape == (3, 3):
+        return matrix.T
+    elif matrix.ndim == 3:
+        return matrix.transpose((1, 0, 2))
+    else:
+        raise ValueError("Input matrix must be of shape (3,3) or (3,3,N).")

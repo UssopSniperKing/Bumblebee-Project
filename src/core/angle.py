@@ -14,8 +14,7 @@ class Angle:
         if unit not in {"rad", "deg"}:
             raise ValueError("Angle unit must be 'deg' or 'rad'.")
 
-        self._values = np.asarray(values, dtype=np.float64)
-        self._values.reshape(-1) # ensure we have a 1D array of shape (N,)
+        self._values = np.asarray(values).reshape(-1) # ensure we have a 1D array of shape (N,)
         self._unit = unit
 
     @property
