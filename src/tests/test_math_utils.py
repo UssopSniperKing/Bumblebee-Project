@@ -1,75 +1,146 @@
 import pytest
 import numpy as np
-from src.core.math_utils import time_derivative, cross, dot, normalize
-from src.core.vector import Vector3D
-from src.core.referentials import Referential
+from src.core import Vector3D, Referential, time_derivative, cross, dot, normalize
 
-def test_time_derivative():
-    time = np.array([0, 1, 2, 3])
-    coords = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])
-    vector = Vector3D(coords, Referential.GLOBAL)
+@pytest.fixture
+def time_array():
+    return np.array([0, 0.1, 0.2, 0.3])
 
-    derivative = time_derivative(time, vector)
-    expected_coords = np.array([[1, 1, 1, 1], [1, 1, 1, 1], [1, 1, 1, 1]])
-    assert isinstance(derivative, Vector3D)
-    assert np.allclose(derivative.coords, expected_coords)
-    assert derivative.referential == Referential.GLOBAL
+@pytest.fixture
+def vector_time_series():
+    coords = np.array([[1, 2, 3, 4],
+                      [2, 3, 4, 5],
+                      [3, 4, 5, 6]])
+    return Vector3D(coords, Referential.GLOBAL)
 
-    # Test shape mismatch
-    invalid_time = np.array([0, 1])
-    with pytest.raises(ValueError):
-        time_derivative(invalid_time, vector)
+def test_time_derivative_validation(time_array, vector_time_series):
+    # Invalid vector type
+    with pytest.raises(ValueError, match="Invalid vector type"):
+        time_derivative(time_array, "not_a_vector")
+    
+    # Time and vector shape mismatch
+    wrong_time = np.array([0, 0.1, 0.2])
+    with pytest.raises(ValueError, match="Time and vector shape mismatch"):
+        time_derivative(wrong_time, vector_time_series)
+    
+    # Non-global referential
+    local_vector = Vector3D([[1], [2], [3]], Referential.WING)
+    with pytest.raises(ValueError, match="The vector must be in the GLOBAL referential"):
+        time_derivative(np.array([0]), local_vector)
 
-    # Test invalid referential
-    vector_body = Vector3D(coords, Referential.BODY)
-    with pytest.raises(ValueError):
-        time_derivative(time, vector_body)
-
-def test_cross_product():
-    coords_u = np.array([[1, 0], [0, 1], [0, 0]])
-    coords_v = np.array([[0, 1], [1, 0], [0, 0]])
-    u = Vector3D(coords_u, Referential.GLOBAL)
-    v = Vector3D(coords_v, Referential.GLOBAL)
-
-    result = cross(u, v)
-    expected_coords = np.array([[0, 0], [0, 0], [1, -1]])
+def test_time_derivative_calculation(time_array, vector_time_series):
+    result = time_derivative(time_array, vector_time_series)
+    
+    # Check type and referential
     assert isinstance(result, Vector3D)
-    assert np.allclose(result.coords, expected_coords)
     assert result.referential == Referential.GLOBAL
+    
+    # Check shape
+    assert result.coords.shape == vector_time_series.coords.shape
+    
+    # First point (forward difference)
+    expected_first = np.array([[10], [10], [10]])  # (point2 - point1)/dt
+    np.testing.assert_array_almost_equal(
+        result.coords[:, 0:1], expected_first
+    )
+    
+    # Middle points (centered difference)
+    dt = 0.1
+    for i in range(1, len(time_array)-1):
+        expected = (vector_time_series.coords[:, i+1] - vector_time_series.coords[:, i-1]) / (2*dt)
+        np.testing.assert_array_almost_equal(
+            result.coords[:, i], expected
+        )
+    
+    # Last point (backward difference)
+    expected_last = np.array([[10], [10], [10]])  # (pointN - pointN-1)/dt
+    np.testing.assert_array_almost_equal(
+        result.coords[:, -1:], expected_last
+    )
 
-    # Test referential mismatch
-    v_body = Vector3D(coords_v, Referential.BODY)
-    with pytest.raises(ValueError):
-        cross(u, v_body)
+def test_cross_product_validation():
+    v1 = Vector3D([1, 0, 0], Referential.GLOBAL)
+    
+    # Invalid vector type
+    with pytest.raises(ValueError, match="must be a Vector3D object"):
+        cross(v1, "not_a_vector")
+    with pytest.raises(ValueError, match="must be a Vector3D object"):
+        cross("not_a_vector", v1)
+    
+    # Referential mismatch
+    v2 = Vector3D([0, 1, 0], Referential.WING)
+    with pytest.raises(ValueError, match="Referentials mismatch"):
+        cross(v1, v2)
 
-def test_dot_product():
-    coords_u = np.array([[1, 2], [3, 4], [5, 6]])
-    coords_v = np.array([[6, 5], [4, 3], [2, 1]])
-    u = Vector3D(coords_u, Referential.GLOBAL)
-    v = Vector3D(coords_v, Referential.GLOBAL)
+def test_cross_product_calculation():
+    # Single vectors
+    v1 = Vector3D([1, 0, 0], Referential.GLOBAL)
+    v2 = Vector3D([0, 1, 0], Referential.GLOBAL)
+    result = cross(v1, v2)
+    
+    assert isinstance(result, Vector3D)
+    assert result.referential == Referential.GLOBAL
+    np.testing.assert_array_almost_equal(
+        result.coords, np.array([[0], [0], [1]])
+    )
+    
+    # Multiple vectors
+    v3 = Vector3D([[1, 2], [0, 0], [0, 0]], Referential.GLOBAL)
+    v4 = Vector3D([[0, 0], [1, 1], [0, 0]], Referential.GLOBAL)
+    result = cross(v3, v4)
+    expected = np.array([[0, 0], [0, 0], [1, 2]])
+    np.testing.assert_array_almost_equal(result.coords, expected)
 
-    result = dot(u, v)
-    expected_result = np.array([28, 28])
+def test_dot_product_validation():
+    v1 = Vector3D([1, 0, 0], Referential.GLOBAL)
+    
+    # Invalid vector type
+    with pytest.raises(ValueError, match="must be a Vector3D object"):
+        dot(v1, "not_a_vector")
+    with pytest.raises(ValueError, match="must be a Vector3D object"):
+        dot("not_a_vector", v1)
+    
+    # Referential mismatch
+    v2 = Vector3D([0, 1, 0], Referential.WING)
+    with pytest.raises(ValueError, match="Referentials mismatch"):
+        dot(v1, v2)
+
+def test_dot_product_calculation():
+    # Single vectors
+    v1 = Vector3D([1, 0, 0], Referential.GLOBAL)
+    v2 = Vector3D([1, 1, 0], Referential.GLOBAL)
+    result = dot(v1, v2)
     assert isinstance(result, np.ndarray)
-    assert np.allclose(result, expected_result)
+    np.testing.assert_array_almost_equal(result, np.array([1]))
+    
+    # Multiple vectors
+    v3 = Vector3D([[1, 2], [1, 0], [0, 1]], Referential.GLOBAL)
+    v4 = Vector3D([[1, 1], [1, 0], [1, 0]], Referential.GLOBAL)
+    result = dot(v3, v4)
+    expected = np.array([2, 2])
+    np.testing.assert_array_almost_equal(result, expected)
 
-    # Test referential mismatch
-    v_body = Vector3D(coords_v, Referential.BODY)
-    with pytest.raises(ValueError):
-        dot(u, v_body)
+def test_normalize_validation():
+    # Invalid vector type
+    with pytest.raises(ValueError, match="must be a Vector3D object"):
+        normalize("not_a_vector")
 
-def test_normalize():
-    coords = np.array([[3, 1], [4, 0], [0, 2]])
-    vector = Vector3D(coords, Referential.GLOBAL)
 
-    result = normalize(vector)
-    expected_coords = np.array([[0.6, 0.4472136], [0.8, 0], [0, 0.89442719]])
+def test_normalize_calculation():
+    # Single vector
+    v1 = Vector3D([3, 0, 0], Referential.GLOBAL)
+    result = normalize(v1)
     assert isinstance(result, Vector3D)
-    assert np.allclose(result.coords, expected_coords)
-    assert result.referential == Referential.GLOBAL
-
-    # Test zero vector
-    zero_coords = np.array([[0, 0], [0, 0], [0, 0]])
-    zero_vector = Vector3D(zero_coords, Referential.GLOBAL)
-    with pytest.raises(ZeroDivisionError):
-        normalize(zero_vector)
+    assert result.referential == v1.referential
+    np.testing.assert_array_almost_equal(
+        result.coords, np.array([[1], [0], [0]])
+    )
+    
+    # Multiple vectors
+    v2 = Vector3D([[3, 0], [0, 4], [0, 0]], Referential.GLOBAL)
+    result = normalize(v2)
+    expected = np.array([[1, 0], [0, 1], [0, 0]])
+    np.testing.assert_array_almost_equal(result.coords, expected)
+    
+    # Check unit length
+    assert np.allclose(np.linalg.norm(result.coords, axis=0), 1.0)

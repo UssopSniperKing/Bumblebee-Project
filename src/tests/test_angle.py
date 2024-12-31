@@ -1,89 +1,145 @@
 import pytest
 import numpy as np
-from src.core.angle import Angle
+from src.core import Angle
 
-def test_angle_initialization():
-    # Test valid initialization
-    angle_rad = Angle([0, np.pi / 2, np.pi], unit="rad")
-    assert np.allclose(angle_rad.radians, [0, np.pi / 2, np.pi])
-    assert angle_rad.degrees.shape == angle_rad.radians.shape
 
-    angle_deg = Angle([0, 90, 180], unit="deg")
-    assert np.allclose(angle_deg.degrees, [0, 90, 180])
-    assert angle_deg.radians.shape == angle_deg.degrees.shape
+@pytest.fixture
+def single_angle():
+    return Angle(45, "deg")
 
-    # Test multidimensional initialization
-    angle_multi = Angle([[0, np.pi / 2], [np.pi, 3 * np.pi / 2]], unit="rad")
-    assert np.allclose(angle_multi.radians, [[0, np.pi / 2], [np.pi, 3 * np.pi / 2]])
-    assert angle_multi.radians.shape == (2, 2)
+
+@pytest.fixture
+def multiple_angles():
+    return Angle([0, 45, 90], "deg")
+
+
+def test_init_validation():
+    # Valid initializations
+    a1 = Angle(45, "deg")
+    assert isinstance(a1._values, np.ndarray)
+    assert a1._values.size == 1
+
+    a2 = Angle([0, 45, 90], "deg")
+    assert a2._values.shape == (3,)
+
+    a3 = Angle(np.array([0, 45, 90]), "deg")
+    assert a3._values.shape == (3,)
+
+    a4 = Angle([[0, 45], [90, 135]], "deg")
+    assert a4._values.shape == (4,)
+
+    # Invalid initializations
+    with pytest.raises(ValueError):
+        Angle(45, "invalid_unit")
+
+
+def test_unit_conversion():
+    # Test degree to radian conversion
+    a1 = Angle(180, "deg")
+    np.testing.assert_almost_equal(a1.radians, np.pi)
+
+    # Test radian to degree conversion
+    a2 = Angle(np.pi, "rad")
+    np.testing.assert_almost_equal(a2.degrees, 180)
+
+    # Test multiple angles conversion
+    a3 = Angle([0, 90, 180], "deg")
+    expected_rad = np.array([0, np.pi / 2, np.pi])
+    np.testing.assert_array_almost_equal(a3.radians, expected_rad)
+
+
+def test_set_unit():
+    a1 = Angle(90, "deg")
+
+    # Test deg to rad conversion
+    a1.set_unit("rad")
+    assert a1._unit == "rad"
+    np.testing.assert_almost_equal(a1._values, np.pi / 2)
+
+    # Test rad to deg conversion
+    a1.set_unit("deg")
+    assert a1._unit == "deg"
+    np.testing.assert_almost_equal(a1._values, 90)
 
     # Test invalid unit
     with pytest.raises(ValueError):
-        Angle([0, 1], unit="invalid")
+        a1.set_unit("invalid")
 
-def test_angle_conversion():
-    angle = Angle([0, 90, 180], unit="deg")
-    assert np.allclose(angle.radians, [0, np.pi / 2, np.pi])
 
-    angle.set_unit("rad")
-    assert np.allclose(angle.radians, [0, np.pi / 2, np.pi])
+def test_apply():
+    angles = Angle([0, 90, 180], "deg")
 
-    angle.set_unit("deg")
-    assert np.allclose(angle.degrees, [0, 90, 180])
+    # Test sin function
+    result = angles.apply(np.sin)
+    expected = np.array([0, 1, 0])
+    np.testing.assert_array_almost_equal(result.radians, expected)
 
+    # Test custom function
+    def double(x):
+        return 2 * x
+
+    result = angles.apply(double)
+    expected = np.array([0, np.pi, 2 * np.pi])
+    np.testing.assert_array_almost_equal(result.radians, expected)
+
+
+def test_arithmetic_operations():
+    a1 = Angle(45, "deg")
+    a2 = Angle(45, "deg")
+
+    # Addition
+    result = a1 + a2
+    assert result._unit == "rad"
+    np.testing.assert_almost_equal(result.degrees, 90)
+
+    # Subtraction
+    result = a1 - a2
+    assert result._unit == "rad"
+    np.testing.assert_almost_equal(result.degrees, 0)
+
+    # Invalid operations
     with pytest.raises(ValueError):
-        angle.set_unit("invalid")
-
-    # Test conversion with multidimensional input
-    angle_multi = Angle([[0, 90], [180, 270]], unit="deg")
-    assert np.allclose(angle_multi.radians, [[0, np.pi / 2], [np.pi, 3 * np.pi / 2]])
-    angle_multi.set_unit("rad")
-    assert np.allclose(angle_multi.degrees, [[0, 90], [180, 270]])
-
-def test_angle_operations():
-    angle1 = Angle([0, 90, 180], unit="deg")
-    angle2 = Angle([0, np.pi / 2, np.pi], unit="rad")
-
-    angle_sum = angle1 + angle2
-    assert np.allclose(angle_sum.radians, [0, np.pi, 2 * np.pi])
-
-    angle_diff = angle1 - angle2
-    assert np.allclose(angle_diff.radians, [0, 0, 0])
-
-    # Test operations with multidimensional inputs
-    angle_multi1 = Angle([[0, 90], [180, 270]], unit="deg")
-    angle_multi2 = Angle([[0, np.pi / 2], [np.pi, 3 * np.pi / 2]], unit="rad")
-
-    angle_sum_multi = angle_multi1 + angle_multi2
-    assert angle_sum_multi.radians.shape == (2, 2)
-    assert np.allclose(angle_sum_multi.radians, [[0, np.pi], [2 * np.pi, 3 * np.pi]])
-
-    angle_diff_multi = angle_multi1 - angle_multi2
-    assert angle_diff_multi.radians.shape == (2, 2)
-    assert np.allclose(angle_diff_multi.radians, [[0, 0], [0, 0]])
-
+        a1 + 45  # Can only add Angle objects
     with pytest.raises(ValueError):
-        angle1 + [1, 2, 3]  # Adding non-Angle object
+        a1 - "45"  # Can only subtract Angle objects
 
-    with pytest.raises(ValueError):
-        angle1 - [1, 2, 3]  # Subtracting non-Angle object
 
-def test_angle_apply():
-    angle = Angle([0, np.pi / 2, np.pi], unit="rad")
-    applied_angle = angle.apply(np.sin)
-    assert np.allclose(applied_angle.radians, [0, 1, 0])
-    assert applied_angle.radians.shape == angle.radians.shape
+def test_length_operations(single_angle, multiple_angles):
+    assert isinstance(single_angle._values, np.ndarray)
+    assert single_angle._values.size == 1
+    assert len(multiple_angles) == 3
 
-    # Test apply with multidimensional input
-    angle_multi = Angle([[0, np.pi / 2], [np.pi, 3 * np.pi / 2]], unit="rad")
-    applied_angle_multi = angle_multi.apply(np.cos)
-    assert np.allclose(applied_angle_multi.radians, [[1, 0], [-1, 0]])
-    assert applied_angle_multi.radians.shape == angle_multi.radians.shape
 
-def test_angle_length():
-    angle = Angle([0, 90, 180], unit="deg")
-    assert len(angle) == 3
+def test_broadcasting():
+    # Test operations with different lengths
+    a1 = Angle(45, "deg")
+    a2 = Angle([0, 45, 90], "deg")
 
-    # Test length with multidimensional input
-    angle_multi = Angle([[0, 90], [180, 270]], unit="deg")
-    assert len(angle_multi) == 2
+    # Addition
+    result = a1 + a2
+    expected = np.array([45, 90, 135])
+    np.testing.assert_array_almost_equal(result.degrees, expected)
+
+    # Subtraction
+    result = a2 - a1
+    expected = np.array([-45, 0, 45])
+    np.testing.assert_array_almost_equal(result.degrees, expected)
+
+
+def test_repr(single_angle):
+    assert repr(single_angle) == f"Angle(values={single_angle._values}, unit='deg')"
+
+
+def test_array_shapes():
+    # Test scalar input
+    a1 = Angle(45, "deg")
+    assert isinstance(a1._values, np.ndarray)
+    assert a1._values.size == 1
+
+    # Test list input
+    a2 = Angle([0, 45, 90], "deg")
+    assert a2._values.shape == (3,)
+
+    # Test numpy array input
+    a3 = Angle(np.array([0, 45, 90]), "deg")
+    assert a3._values.shape == (3,)

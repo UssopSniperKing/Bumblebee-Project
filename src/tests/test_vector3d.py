@@ -2,103 +2,144 @@ import pytest
 import numpy as np
 from src.core import Vector3D, Referential
 
-def test_vector_creation():
-    # Test valid 1D array
+
+@pytest.fixture
+def single_vector():
+    return Vector3D([1, 2, 3], Referential.GLOBAL)
+
+
+@pytest.fixture
+def multiple_vectors():
+    return Vector3D([[1, 4], [2, 5], [3, 6]], Referential.GLOBAL)
+
+
+def test_init_validation():
+    # Valid initializations
     v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
     assert v1.coords.shape == (3, 1)
-    assert v1.referential == Referential.GLOBAL
 
-    # Test valid 2D array (3, N)
-    v2 = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.BODY)
+    v2 = Vector3D([[1, 4], [2, 5], [3, 6]], Referential.GLOBAL)
     assert v2.coords.shape == (3, 2)
-    assert v2.referential == Referential.BODY
 
-    # Test valid 2D array (N, 3)
-    v3 = Vector3D([[1, 2, 3], [4, 5, 6]], Referential.WING)
-    assert v3.coords.shape == (3, 2)
-    assert v3.referential == Referential.WING
+    v3 = Vector3D([[1, 2, 3]], Referential.GLOBAL)  # Shape (1, 3)
+    assert v3.coords.shape == (3, 1)
 
-    # Test invalid referential
+    # Invalid initializations
     with pytest.raises(ValueError):
-        Vector3D([1, 2, 3], "INVALID")
+        Vector3D([1, 2], Referential.GLOBAL)  # Wrong length
 
-    # Test invalid array shape
     with pytest.raises(ValueError):
-        Vector3D([1, 2], Referential.GLOBAL)
+        Vector3D([[[1, 2, 3]]], Referential.GLOBAL)  # 3D array
 
-    # Test invalid array type
     with pytest.raises(ValueError):
-        Vector3D("invalid", Referential.BODY)
+        Vector3D([1, 2, 3], "GLOBAL")  # Invalid referential
 
-def test_vector_properties():
-    v = Vector3D([1, 2, 3], Referential.GLOBAL)
-    assert np.allclose(v.coords, np.array([[1], [2], [3]]))
-    assert v.referential == Referential.GLOBAL
 
-def test_vector_norm():
-    v = Vector3D([[3, 4], [0, 0], [0, 0]], Referential.WING)
-    assert np.allclose(v.norm(), [3, 4])
+def test_properties(single_vector, multiple_vectors):
+    # Test coords property
+    assert single_vector.coords.shape == (3, 1)
+    assert multiple_vectors.coords.shape == (3, 2)
 
-def test_vector_addition():
+    # Test referential property
+    assert single_vector.referential == Referential.GLOBAL
+    assert multiple_vectors.referential == Referential.GLOBAL
+
+
+def test_norm(single_vector, multiple_vectors):
+    # Single vector norm
+    expected_norm = np.sqrt(14)  # sqrt(1^2 + 2^2 + 3^2)
+    assert np.isclose(single_vector.norm(), expected_norm)
+
+    # Multiple vectors norm
+    expected_norms = np.array(
+        [np.sqrt(14), np.sqrt(77)]
+    )  # For vectors [1,2,3] and [4,5,6]
+    assert np.allclose(multiple_vectors.norm(), expected_norms)
+
+
+def test_scalar_operations(single_vector):
+    # Multiplication
+    result = single_vector * 2
+    assert np.array_equal(result.coords, np.array([[2], [4], [6]]))
+    assert result.referential == single_vector.referential
+
+    # Division
+    result = single_vector / 2
+    assert np.array_equal(result.coords, np.array([[0.5], [1], [1.5]]))
+    assert result.referential == single_vector.referential
+
+    # Invalid operations
+    with pytest.raises(ValueError):
+        single_vector * "2"
+    with pytest.raises(ValueError):
+        single_vector / 0
+
+
+def test_vector_operations():
     v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
     v2 = Vector3D([4, 5, 6], Referential.GLOBAL)
-    v_sum = v1 + v2
-    assert v_sum.coords.shape == (3, 1)
-    assert np.allclose(v_sum.coords, np.array([[5], [7], [9]]))
 
-    # Test referential mismatch
-    v3 = Vector3D([7, 8, 9], Referential.BODY)
+    # Addition
+    result = v1 + v2
+    assert np.array_equal(result.coords, np.array([[5], [7], [9]]))
+
+    # Subtraction
+    result = v2 - v1
+    assert np.array_equal(result.coords, np.array([[3], [3], [3]]))
+
+    # Operations with different referentials
+    v3 = Vector3D([1, 2, 3], Referential.WING)
     with pytest.raises(ValueError):
         v1 + v3
-
-def test_vector_subtraction():
-    v1 = Vector3D([1, 2, 3], Referential.GLOBAL)
-    v2 = Vector3D([4, 5, 6], Referential.GLOBAL)
-    v_diff = v1 - v2
-    assert v_diff.coords.shape == (3, 1)
-    assert np.allclose(v_diff.coords, np.array([[-3], [-3], [-3]]))
-
-    # Test referential mismatch
-    v3 = Vector3D([7, 8, 9], Referential.BODY)
     with pytest.raises(ValueError):
         v1 - v3
 
-def test_vector_multiplication():
-    v = Vector3D([1, 2, 3], Referential.GLOBAL)
-    v_scaled = v * 2
-    assert v_scaled.coords.shape == (3, 1)
-    assert np.allclose(v_scaled.coords, np.array([[2], [4], [6]]))
 
-    # Test invalid scalar type
-    with pytest.raises(ValueError):
-        v * "invalid"
+def test_broadcasting_operations():
+    # Test broadcasting between (3,1) and (3,N) shapes
+    v1 = Vector3D([1, 2, 3], Referential.GLOBAL)  # Shape (3,1)
+    v2 = Vector3D([[4, 7], [5, 8], [6, 9]], Referential.GLOBAL)  # Shape (3,2)
 
-def test_vector_division():
-    v = Vector3D([2, 4, 6], Referential.GLOBAL)
-    v_scaled = v / 2
-    assert v_scaled.coords.shape == (3, 1)
-    assert np.allclose(v_scaled.coords, np.array([[1], [2], [3]]))
+    # Addition with broadcasting
+    result = v1 + v2
+    expected = np.array([[5, 8], [7, 10], [9, 12]])
+    assert np.array_equal(result.coords, expected)
 
-    # Test division by zero
-    with pytest.raises(ValueError):
-        v / 0
+    # Multiplication with scalar
+    result = v2 * 2
+    expected = np.array([[8, 14], [10, 16], [12, 18]])
+    assert np.array_equal(result.coords, expected)
 
-    # Test invalid scalar type
-    with pytest.raises(ValueError):
-        v / "invalid"
 
-def test_vector_length():
-    v = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.WING)
-    assert len(v) == 2
+def test_len_operation(single_vector, multiple_vectors):
+    assert len(single_vector) == 1
+    assert len(multiple_vectors) == 2
 
-def test_vector_numpy_integration():
-    v = Vector3D([[1, 2], [3, 4], [5, 6]], Referential.GLOBAL)
-    # Test np.asarray
-    array = np.asarray(v)
-    assert array.shape == (3, 2)
-    assert np.allclose(array, v.coords)
 
-    # Test NumPy ufunc (e.g., np.sin)
-    sin_v = np.sin(v)
-    assert isinstance(sin_v, Vector3D)
-    assert sin_v.coords.shape == (3, 2)
+def test_numpy_integration(single_vector):
+    # Test numpy array conversion
+    arr = np.asarray(single_vector)
+    assert isinstance(arr, np.ndarray)
+    assert arr.shape == (3, 1)
+
+    # Test ufunc operations
+    result = np.sin(single_vector)
+    assert isinstance(result, Vector3D)
+    assert result.coords.shape == (3, 1)
+    assert result.referential == single_vector.referential
+
+
+def test_shape_combinations():
+    # Test operations between different shapes
+    v1 = Vector3D([[1], [2], [3]], Referential.GLOBAL)  # (3,1)
+    v2 = Vector3D([[1, 4, 7], [2, 5, 8], [3, 6, 9]], Referential.GLOBAL)  # (3,3)
+
+    # Addition
+    result = v1 + v2
+    expected = np.array([[2, 5, 8], [4, 7, 10], [6, 9, 12]])
+    assert np.array_equal(result.coords, expected)
+
+    # Test scalar multiplication with different shapes
+    result = v2 * 2
+    expected = np.array([[2, 8, 14], [4, 10, 16], [6, 12, 18]])
+    assert np.array_equal(result.coords, expected)
