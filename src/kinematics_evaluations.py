@@ -72,10 +72,10 @@ def evaluate_tip_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
 
-    omega_wing = Holder.omega.set_referential(Referential.WING)
-    ey_wing = Holder.ey.set_referential(Referential.WING)
+    Holder.omega.set_referential(Referential.WING)
+    Holder.ey.set_referential(Referential.WING)
 
-    Holder.u_tip = cross(omega_wing, ey_wing)
+    Holder.u_tip = cross(Holder.omega, Holder.ey)
 
     return Holder
 
