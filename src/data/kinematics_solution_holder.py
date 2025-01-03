@@ -5,10 +5,24 @@ import numpy as np
 
 @dataclass
 class KinematicsSolutionHolder:
+    # Time Vector
     time: np.array
-    alpha: Angle
+
+    # Angles
     phi: Angle
+    alpha: Angle
     theta: Angle
+    eta: Angle
+    psi: Angle
+    beta: Angle
+    gamma: Angle
+
+    # Angles time derivatives
+    phi_dt: Angle
+    alpha_dt: Angle
+    theta_dt: Angle
+
+    # Velocities
     u_tip: Vector3D
     
 

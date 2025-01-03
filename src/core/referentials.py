@@ -17,7 +17,7 @@ class Referential(Enum):
     STROKE = auto()
 
 
-class Transformations:  # todo : add tests
+class Transformations:
     _transformations = {}
     _is_initialized = False
 
