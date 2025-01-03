@@ -72,8 +72,8 @@ def evaluate_tip_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
 
-    omega_wing = Holder.omega.to_referential(Referential.WING)
-    ey_wing = Holder.ey.to_referential(Referential.WING)
+    omega_wing = Holder.omega.set_referential(Referential.WING)
+    ey_wing = Holder.ey.set_referential(Referential.WING)
 
     Holder.u_tip = cross(omega_wing, ey_wing)
 
@@ -90,8 +90,8 @@ def define_aero_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolu
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
 
-    u_tip_global = Holder.u_tip.to_referential(Referential.GLOBAL)
-    ey_global = Holder.ey.to_referential(Referential.GLOBAL)
+    u_tip_global = Holder.u_tip.set_referential(Referential.GLOBAL)
+    ey_global = Holder.ey.set_referential(Referential.GLOBAL)
     
     e_drag_global = - normalize(u_tip_global)
     e_lift_global = cross(ey_global, e_drag_global)

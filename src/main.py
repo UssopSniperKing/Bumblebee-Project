@@ -12,13 +12,13 @@ def main() -> None:
     NUMBER_TIME_STEPS = 1000
     Kinematics = KinematicsSolutionHolder()
     Kinematics = evaluate_angles_kinematics(NUMBER_TIME_STEPS, Kinematics)
+    initialize_transformations(Kinematics)
 
     Kinematics = define_unit_vectors(Kinematics)
 
     Kinematics = evaluate_angular_velocity(Kinematics)
     
     Kinematics = evaluate_tip_velocity(Kinematics)
-    initialize_transformations(Kinematics)
 
     plot_kinematics(Kinematics)
 

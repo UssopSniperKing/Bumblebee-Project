@@ -57,7 +57,7 @@ class Vector3D:
         """
         return self._referential
 
-    def set_referential(self, new_referential: Referential) -> None: # todo : add tests
+    def set_referential(self, new_referential: Referential) -> "Vector3D":
         """Change the referential of the vector by applying the corresponding transformation matrix.
 
         Parameters:
@@ -69,7 +69,7 @@ class Vector3D:
             ValueError: If the transformation matrix shape is invalid.
         
         Returns:    
-            None
+            Vector3D: New vector in the new referential.
         """
 
         if not isinstance(new_referential, Referential):
@@ -79,21 +79,29 @@ class Vector3D:
             raise ValueError("Transformations must be initialized first.")
         
         if new_referential == self.referential:
-            return None
+            return self
 
         transformation_matrix = Transformations.get_matrix(self.referential, new_referential)
 
-        # shape check: (3,3) or (3,3,N) with N = len(self)
-        if transformation_matrix.shape == (3, 3): # If we have a single transformation matrix apply it to every vector
-
-            self.coords = np.einsum("ij,jk->ik", transformation_matrix, self.coords)
+        # If we have (3,3) and (3,1)
+        if transformation_matrix.shape == (3, 3) and len(self) == 1:
+            self._coords = transformation_matrix @ self.coords
+            self._referential = new_referential
+        
+        # if we have (3,3,N) and (3,N)
+        elif transformation_matrix.shape[2] == len(self):
+            self._coords = np.einsum("ijk,jk->ik", transformation_matrix, self.coords)
             self._referential = new_referential
 
-        elif transformation_matrix.shape[2] != len(self):
-            raise ValueError("Invalid transformation matrix shape. Expected (3,3) or (3,3,N), N must be equal to the number of vectors.")           
-        
-        self.coords = np.einsum("ijk,jk->ik", transformation_matrix, self.coords)
-        self._referential = new_referential    
+        # if we have (3,3,N) and (3,1)
+        elif transformation_matrix.ndim == 3 and len(self) == 1:
+            self._coords = np.einsum("ijk,jl->ik", transformation_matrix, self.coords)
+            self._referential = new_referential
+
+        else:
+            raise ValueError("Invalid shape for transformation matrix. Allowed shapes: (3,3) and (3,3,N) for matrices and (3,N) for vectors.")
+
+        return self    
 
     def norm(self) -> np.ndarray:
         """Euclidian norm of each vector.
