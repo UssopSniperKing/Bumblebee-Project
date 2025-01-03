@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from src.core import Vector3D, Referential, time_derivative, cross, dot, normalize
+from src.core import Vector3D, Referential, vector_time_derivative, cross, dot, normalize
 
 @pytest.fixture
 def time_array():
@@ -13,23 +13,23 @@ def vector_time_series():
                       [3, 4, 5, 6]])
     return Vector3D(coords, Referential.GLOBAL)
 
-def test_time_derivative_validation(time_array, vector_time_series):
+def test_vector_time_derivative_validation(time_array, vector_time_series):
     # Invalid vector type
     with pytest.raises(ValueError, match="Invalid vector type"):
-        time_derivative(time_array, "not_a_vector")
+        vector_time_derivative(time_array, "not_a_vector")
     
     # Time and vector shape mismatch
     wrong_time = np.array([0, 0.1, 0.2])
     with pytest.raises(ValueError, match="Time and vector shape mismatch"):
-        time_derivative(wrong_time, vector_time_series)
+        vector_time_derivative(wrong_time, vector_time_series)
     
     # Non-global referential
     local_vector = Vector3D([[1], [2], [3]], Referential.WING)
     with pytest.raises(ValueError, match="The vector must be in the GLOBAL referential"):
-        time_derivative(np.array([0]), local_vector)
+        vector_time_derivative(np.array([0]), local_vector)
 
-def test_time_derivative_calculation(time_array, vector_time_series):
-    result = time_derivative(time_array, vector_time_series)
+def test_vector_time_derivative_calculation(time_array, vector_time_series):
+    result = vector_time_derivative(time_array, vector_time_series)
     
     # Check type and referential
     assert isinstance(result, Vector3D)
