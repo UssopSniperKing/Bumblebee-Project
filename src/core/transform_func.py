@@ -26,7 +26,7 @@ def get_rotation_matrix_z(angle: Angle) -> np.ndarray:
 
     for i in range(N):
         rotation_matrices[:, :, i] = np.array(
-            [[cosine[i], sine[i], 0], [0, 1, 0], [sine[i], 0, cosine[i]]]
+            [[cosine[i], sine[i], 0], [-sine[i], cosine[i], 0], [0, 0, 1]]
         )
 
     if N == 1:
