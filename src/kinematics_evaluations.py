@@ -4,6 +4,7 @@ from data import KinematicsSolutionHolder
 from core import Vector3D
 from core import Referential
 from core import cross
+from core import normalize
 import numpy as np
 
 def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
@@ -25,6 +26,14 @@ def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutio
 
 
 def define_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """Define the unit vectors of the bumblebee model
+
+    Args:
+        Holder (KinematicsSolutionHolder): Holder for the kinematic solution
+    
+    Returns:
+        KinematicsSolutionHolder: Holder for the kinematic solution
+    """
 
     Holder.ex = Vector3D([1, 0, 0], Referential.STROKE)
     Holder.ey = Vector3D([0, 1, 0], Referential.STROKE)
@@ -34,6 +43,14 @@ def define_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolutionH
 
 
 def evaluate_angular_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """Evaluate the angular velocity of the bumblebee model
+
+    Args:
+        Holder (KinematicsSolutionHolder): Holder for the kinematic solution
+
+    Returns:
+        KinematicsSolutionHolder: Holder for the kinematic solution
+    """
 
     omega_stroke = np.empty((3, Holder.time.size))
     omega_stroke[0, :] = Holder.phi_dt.radians - np.sin(Holder.theta.radians) * Holder.alpha_dt.radians
@@ -54,11 +71,32 @@ def evaluate_tip_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-    # todo : add the other important quantities to be computed, u_tip, etc.
 
     omega_wing = Holder.omega.to_referential(Referential.WING)
     ey_wing = Holder.ey.to_referential(Referential.WING)
 
     Holder.u_tip = cross(omega_wing, ey_wing)
+
+    return Holder
+
+
+def define_aero_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """Define the aerodynamic unit vectors
+
+    Args:
+        Holder (KinematicsSolutionHolder): Holder for the kinematic solution
+
+    Returns:
+        KinematicsSolutionHolder: Holder for the kinematic solution
+    """
+
+    u_tip_global = Holder.u_tip.to_referential(Referential.GLOBAL)
+    ey_global = Holder.ey.to_referential(Referential.GLOBAL)
+    
+    e_drag_global = - normalize(u_tip_global)
+    e_lift_global = cross(ey_global, e_drag_global)
+
+    Holder.e_drag = Vector3D(e_drag_global, Referential.GLOBAL)
+    Holder.e_lift = Vector3D(e_lift_global, Referential.GLOBAL)
 
     return Holder

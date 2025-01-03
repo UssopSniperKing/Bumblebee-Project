@@ -57,8 +57,7 @@ class Vector3D:
         """
         return self._referential
 
-    @referential.setter
-    def to_referential(self, new_referential: Referential) -> None: # todo : add tests
+    def set_referential(self, new_referential: Referential) -> None: # todo : add tests
         """Change the referential of the vector by applying the corresponding transformation matrix.
 
         Parameters:
