@@ -1,6 +1,6 @@
-from src.data import KinematicsSolutionHolder
-from src import Transformations
-from src import Angle
+from data import KinematicsSolutionHolder
+from core import Transformations
+from core import Angle
 
 def initialize_transformations(Holder: KinematicsSolutionHolder) -> None:
     

@@ -1,5 +1,5 @@
-from src.core import Scalar
-from src.core import Angle
+from core import Scalar
+from core import Angle
 import numpy as np
 
 

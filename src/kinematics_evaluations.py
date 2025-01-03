@@ -1,4 +1,5 @@
-from src import bumblebee_kinematic_model, angle_time_derivative
+from bumblebee_kinematic_model import bumblebee_kinematics_model
+from core import angle_time_derivative
 from data import KinematicsSolutionHolder
 
 def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
@@ -11,11 +12,10 @@ def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutio
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-    Holder.time, Holder.alpha, Holder.phi, Holder.theta = bumblebee_kinematic_model(number_time_steps)
-
-    Holder.alpha_dt = angle_time_derivative(Holder.alpha, Holder.time)
-    Holder.phi_dt = angle_time_derivative(Holder.phi, Holder.time)
-    Holder.theta_dt = angle_time_derivative(Holder.theta, Holder.time)
+    Holder.time, Holder.alpha, Holder.phi, Holder.theta = bumblebee_kinematics_model(number_time_steps)
+    Holder.alpha_dt = angle_time_derivative(Holder.time, Holder.alpha)
+    Holder.phi_dt = angle_time_derivative(Holder.time, Holder.phi)
+    Holder.theta_dt = angle_time_derivative(Holder.time, Holder.theta)
 
     return Holder
 

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from src.core import Angle, Vector3D
+from core import Angle, Vector3D
 import numpy as np
 
 
@@ -25,6 +25,8 @@ class KinematicsSolutionHolder:
     # Velocities
     u_tip: Vector3D
     
+    def __init__(self):
+        pass
 
     # todo : add the other important quantities to be computed
 

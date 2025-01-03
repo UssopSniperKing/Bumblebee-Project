@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from src.data import KinematicsSolutionHolder
-from src.kinematics_evaluations import evaluate_angles_kinematics, evaluate_velocities
-from src.initialize_transformations import initialize_transformations
+from data import KinematicsSolutionHolder
+from kinematics_evaluations import evaluate_angles_kinematics, evaluate_velocities
+from initialize_transformations import initialize_transformations
 
 
 def main() -> None:
