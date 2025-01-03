@@ -9,7 +9,7 @@ from plot_kinematics import plot_kinematics
 def main() -> None:
     """Main function
     """
-    NUMBER_TIME_STEPS = 1000
+    NUMBER_TIME_STEPS = 400
     Kinematics = KinematicsSolutionHolder()
     Kinematics = evaluate_angles_kinematics(NUMBER_TIME_STEPS, Kinematics)
     initialize_transformations(Kinematics)
