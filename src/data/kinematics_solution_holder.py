@@ -22,7 +22,13 @@ class KinematicsSolutionHolder:
     alpha_dt: Angle
     theta_dt: Angle
 
+    # Unit vectors
+    ex: Vector3D
+    ey: Vector3D
+    ez: Vector3D
+
     # Velocities
+    omega: Vector3D
     u_tip: Vector3D
     
     def __init__(self):
