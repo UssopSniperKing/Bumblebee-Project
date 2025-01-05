@@ -289,7 +289,6 @@ def global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma) -> np.ndarra
 
     return output_matrix
 
-
 def transpose(matrix: np.ndarray) -> np.ndarray:  # todo : add tests
     """Transpose the input matrix. If the input matrix is of shape (3,3,N), the function
     returns a matrix of shape (3,3,N).

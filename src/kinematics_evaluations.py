@@ -35,9 +35,9 @@ def define_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolutionH
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
 
-    Holder.ex = Vector3D([1, 0, 0], Referential.STROKE)
-    Holder.ey = Vector3D([0, 1, 0], Referential.STROKE)
-    Holder.ez = Vector3D([0, 0, 1], Referential.STROKE)
+    Holder.ex = Vector3D([1, 0, 0], Referential.WING)
+    Holder.ey = Vector3D([0, 1, 0], Referential.WING)
+    Holder.ez = Vector3D([0, 0, 1], Referential.WING)
 
     return Holder
 

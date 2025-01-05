@@ -14,22 +14,23 @@ def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
 def plot_angles(Holder: KinematicsSolutionHolder) -> None:
 
     plt.figure()
-    plt.plot(Holder.time, Holder.phi.radians, label='phi')
-    plt.plot(Holder.time, Holder.alpha.radians, label='alpha')
-    plt.plot(Holder.time, Holder.theta.radians, label='theta')
+    plt.plot(Holder.time, Holder.phi.degrees, label='phi')
+    plt.plot(Holder.time, Holder.alpha.degrees, label='alpha')
+    plt.plot(Holder.time, Holder.theta.degrees, label='theta')
     plt.xlabel('time')
-    plt.ylabel('angles')
+    plt.ylabel('angles (degrees)')
     plt.title('Angle')
     plt.legend()
 
     plt.figure()
-    plt.plot(Holder.time, Holder.phi_dt.radians, label='phi_dt')
-    plt.plot(Holder.time, Holder.alpha_dt.radians, label='alpha_dt')
-    plt.plot(Holder.time, Holder.theta_dt.radians, label='theta_dt')
+    plt.plot(Holder.time, Holder.phi_dt.degrees, label='phi_dt')
+    plt.plot(Holder.time, Holder.alpha_dt.degrees, label='alpha_dt')
+    plt.plot(Holder.time, Holder.theta_dt.degrees, label='theta_dt')
     plt.xlabel('time')
-    plt.ylabel('angles')
+    plt.ylabel('angles (degrees/s)')
     plt.title('Angles derivatives')
     plt.legend()
+
 
 def plot_u_tip(Holder) -> None:
 
@@ -54,8 +55,6 @@ def plot_omega(Holder) -> None:
 
 def plot_e_unit(Holder) -> None:
 
-    print(Holder.ez)
-    Holder.ez.set_referential(Referential.WING)
     print(Holder.ez)
     Holder.ez.set_referential(Referential.GLOBAL)
     print(Holder.ez)
