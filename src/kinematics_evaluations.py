@@ -5,6 +5,7 @@ from core import Vector3D
 from core import Referential
 from core import cross
 from core import normalize
+from core import Angle
 import numpy as np
 
 def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
@@ -34,7 +35,6 @@ def define_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolutionH
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-
     Holder.ex = Vector3D([1, 0, 0], Referential.WING)
     Holder.ey = Vector3D([0, 1, 0], Referential.WING)
     Holder.ez = Vector3D([0, 0, 1], Referential.WING)
@@ -51,7 +51,6 @@ def evaluate_angular_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSol
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-
     omega_stroke = np.empty((3, Holder.time.size))
     omega_stroke[0, :] = Holder.phi_dt.radians - np.sin(Holder.theta.radians) * Holder.alpha_dt.radians
     omega_stroke[1, :] = np.cos(Holder.phi.radians) * np.cos(Holder.theta.radians) * Holder.alpha_dt.radians - np.sin(Holder.phi.radians) * Holder.theta_dt.radians
@@ -71,7 +70,6 @@ def evaluate_tip_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-
     Holder.omega.set_referential(Referential.WING)
     Holder.ey.set_referential(Referential.WING)
 
@@ -96,7 +94,29 @@ def define_aero_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolu
     e_drag_global = - normalize(u_tip_global)
     e_lift_global = cross(ey_global, e_drag_global)
 
-    Holder.e_drag = Vector3D(e_drag_global, Referential.GLOBAL)
-    Holder.e_lift = Vector3D(e_lift_global, Referential.GLOBAL)
+    sign_alpha = np.sign(Holder.alpha.radians)
+    e_lift_global_coords = np.where(sign_alpha == -1, -e_lift_global.coords, e_lift_global.coords)
+
+    Holder.e_drag = e_drag_global
+    Holder.e_lift = Vector3D(e_lift_global_coords, Referential.GLOBAL)
+
+    return Holder
+
+
+def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """Compute the angle of attack as arctan²(-omega_wing_y, -omega_wing_z)
+
+    Args:
+        Holder (KinematicsSolutionHolder): Holder for the kinematic solution
+
+    Returns:
+        KinematicsSolutionHolder: Holder for the kinematic solution
+    """
+    omega_wing = Holder.omega.set_referential(Referential.WING)
+    omega_wing_y = omega_wing.coords[1,:]
+    omega_wing_z = omega_wing.coords[2,:]
+
+    aoa = np.atan2( -omega_wing_y, -omega_wing_z )
+    Holder.angle_of_attack = Angle(aoa, "rad")
 
     return Holder

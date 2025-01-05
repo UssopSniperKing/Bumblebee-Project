@@ -71,7 +71,7 @@ class Transformations:
         if (source, target) not in Transformations._transformations:
 
             if (target, source) in Transformations._transformations:
-                return transpose(Transformations._transformations[(target, source)]) # todo : add tests
+                return transpose(Transformations._transformations[(target, source)])
             else:
                 raise ValueError("Transformation not available.")
 

@@ -16,6 +16,7 @@ class KinematicsSolutionHolder:
     psi: Angle
     beta: Angle
     gamma: Angle
+    angle_of_attack: Angle
 
     # Angles time derivatives
     phi_dt: Angle
