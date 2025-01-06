@@ -1,4 +1,5 @@
 from bumblebee_kinematic_model import bumblebee_kinematics_model
+from aerodynamic_model import drag_coefficient, lift_coefficient
 from core import angle_time_derivative
 from data import KinematicsSolutionHolder
 from core import Vector3D
@@ -118,5 +119,20 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
 
     aoa = np.atan2( -omega_wing_y, -omega_wing_z )
     Holder.angle_of_attack = Angle(aoa, "rad")
+
+    return Holder
+
+
+def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """Compute CL and CD"""
+
+    K1 = 0
+    K2 = 0
+    K3 = 0
+    K4 = 0
+    # todo : constants needs to find their place in the holder (maybe a dictionnary)
+
+    Holder.lift_coeff = lift_coefficient(Holder.angle_of_attack, K1, K2)
+    Holder.drag_coeff = drag_coefficient(Holder.angle_of_attack, K3, K4)
 
     return Holder

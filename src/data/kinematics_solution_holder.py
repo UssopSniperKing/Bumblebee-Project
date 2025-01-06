@@ -31,6 +31,10 @@ class KinematicsSolutionHolder:
     # Velocities
     omega: Vector3D
     u_tip: Vector3D
+
+    # Aerodynamic coefficients
+    lift_coeff: np.array
+    drag_coeff: np.array
     
     def __init__(self):
         pass
