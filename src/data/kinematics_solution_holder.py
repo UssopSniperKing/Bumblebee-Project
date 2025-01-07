@@ -42,6 +42,14 @@ class KinematicsSolutionHolder:
     # Aerodynamic coefficients
     lift_coeff: np.array
     drag_coeff: np.array
+
+    # Forces
+    force_TC: Vector3D
+    force_TD: Vector3D
+    force_RC: Vector3D
+    force_RD: Vector3D
+    force_AMx: Vector3D
+    force_AMz: Vector3D
     
     def __init__(self):
         pass

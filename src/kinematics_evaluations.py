@@ -9,6 +9,7 @@ from core import cross
 from core import normalize
 from core import Angle
 import numpy as np
+from forces_model import force_RC, force_AMx, force_AMz, force_RD, force_TC, force_TD
 
 def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """Evaluate the kinematics of the bumblebee model
@@ -164,4 +165,39 @@ def compute_accelerations(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
     return Holder
 
 def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
-    pass
+    """"""
+
+    C_RC = 1
+    C_RD = 1
+    
+    C_AMX1 = 1
+    C_AMX2 = 1
+
+    C_AMZ1 = 1
+    C_AMZ2 = 1
+    C_AMZ3 = 1
+    C_AMZ4 = 1
+    C_AMZ5 = 1
+    C_AMZ6 = 1
+
+    omega_planar_wing = Holder.omega_planar.set_referential(Referential.WING)
+    e_lift_global = Holder.e_lift.set_referential(Referential.GLOBAL)
+    e_drag_global = Holder.e_drag.set_referential(Referential.GLOBAL)
+
+    ez_global = Holder.ez.set_referential(Referential.GLOBAL)
+    u_tip_global = Holder.u_tip.set_referential(Referential.GLOBAL)
+    omega_wing = Holder.omega.set_referential(Referential.WING)
+
+    u_tip_dt_wing = Holder.u_tip_dt.set_referential(Referential.WING)
+    omega_dt_wing = Holder.omega_dt.set_referential(Referential.WING)
+    ex_global = Holder.ex.set_referential(Referential.GLOBAL)
+
+    Holder.force_TD = force_TD(Holder.lift_coeff, omega_planar_wing, e_lift_global)
+    Holder.force_TC = force_TC(Holder.drag_coeff, omega_planar_wing, e_drag_global)
+
+    Holder.force_RC = force_RC(u_tip_global, omega_wing, ez_global, C_RC)
+    Holder.force_RD = force_RD(omega_wing, ez_global, C_RD)
+    Holder.force_AMx = force_AMx(u_tip_dt_wing, ex_global, C_AMX1, C_AMX2)
+    Holder.force_AMz = force_AMz(u_tip_dt_wing, omega_dt_wing, ez_global, C_AMZ1, C_AMZ2, C_AMZ3, C_AMZ4, C_AMZ5, C_AMZ6)
+
+    return Holder
