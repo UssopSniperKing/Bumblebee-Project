@@ -145,7 +145,7 @@ def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> Kinema
 def define_planar_angular_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """"""
     omega_wing = Holder.omega.set_referential(Referential.WING)
-    omega_wing_planar_coords = omega_wing.coords
+    omega_wing_planar_coords = omega_wing.coords.copy()
     omega_wing_planar_coords[1,:] = 0
 
     Holder.omega_planar = Vector3D(omega_wing_planar_coords, Referential.WING)
