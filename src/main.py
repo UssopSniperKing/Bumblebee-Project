@@ -12,7 +12,8 @@ from kinematics_evaluations import (
     compute_aerodynamic_coefficients,
     define_aero_unit_vectors,
     define_planar_angular_velocity,
-    compute_accelerations
+    compute_accelerations,
+    compute_forces
 )
 
 
@@ -39,6 +40,8 @@ def main() -> None:
 
     Kinematics = compute_accelerations(Kinematics)
 
+    Kinematics = compute_forces(Kinematics)
+    
     plot_kinematics(Kinematics)
 
 

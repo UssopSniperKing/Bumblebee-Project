@@ -13,6 +13,7 @@ def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
     plot_aero_vectors(Holder)
     plot_u_tip_dt(Holder)
     plot_omega_dt(Holder)
+    plot_forces(Holder)
     plt.show()
 
 
@@ -126,5 +127,18 @@ def plot_omega_dt(Holder) -> None:
     plt.legend()
     plt.title('omega_dt wing')
 
+def plot_forces(Holder):
 
+    plt.figure()
+    plt.plot(Holder.time, Holder.force_TC.coords[2,:], label='F_TC', color='yellow')
+    plt.plot(Holder.time, Holder.force_TD.coords[2,:], label='F_TD', color='lime')
+    plt.plot(Holder.time, Holder.force_RC.coords[2,:], label='F_RC', color='orange')
+    plt.plot(Holder.time, Holder.force_AMz.coords[2,:], label='F_AMz', color='red')
+    plt.plot(Holder.time, Holder.force_AMx.coords[2,:], label='F_AMx', color='red', linestyle='dashed')
+    plt.plot(Holder.time, Holder.force_RD.coords[2,:], label='F_RD', color='green')
+    plt.plot(Holder.time, Holder.force_QSM.coords[2,:], label='F_QSM', color='blue', linestyle='dashed')
+    plt.xlabel('Time')
+    plt.ylabel('Force')
+    plt.title('Vertical components of forces in global coordinate system')
+    plt.legend()
 #def plot_forces():

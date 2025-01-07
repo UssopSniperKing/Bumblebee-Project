@@ -2,7 +2,7 @@ from core import Vector3D, Referential, Scalar
 import numpy as np
 
 
-def force_TD(
+def force_TC(
     lift_coeff: np.array, omega_planar_wing: Vector3D, e_lift_global: Vector3D
 ) -> Vector3D:
     """"""
@@ -15,7 +15,7 @@ def force_TD(
     return Vector3D(force_components, Referential.GLOBAL)
 
 
-def force_TC(
+def force_TD(
     drag_coeff: np.array, omega_planar_wing: Vector3D, e_drag_global: Vector3D
 ) -> Vector3D:
     """"""

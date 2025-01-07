@@ -192,8 +192,8 @@ def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder
     omega_dt_wing = Holder.omega_dt.set_referential(Referential.WING)
     ex_global = Holder.ex.set_referential(Referential.GLOBAL)
 
-    Holder.force_TD = force_TD(Holder.lift_coeff, omega_planar_wing, e_lift_global)
-    Holder.force_TC = force_TC(Holder.drag_coeff, omega_planar_wing, e_drag_global)
+    Holder.force_TD = force_TD(Holder.drag_coeff, omega_planar_wing, e_drag_global)
+    Holder.force_TC = force_TC(Holder.lift_coeff, omega_planar_wing, e_lift_global)
 
     Holder.force_RC = force_RC(u_tip_global, omega_wing, ez_global, C_RC)
     Holder.force_RD = force_RD(omega_wing, ez_global, C_RD)
