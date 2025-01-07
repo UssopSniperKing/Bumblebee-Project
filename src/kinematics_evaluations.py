@@ -1,6 +1,7 @@
 from bumblebee_kinematic_model import bumblebee_kinematics_model
 from aerodynamic_model import drag_coefficient, lift_coefficient
 from core import angle_time_derivative
+from core import vector_time_derivative
 from data import KinematicsSolutionHolder
 from core import Vector3D
 from core import Referential
@@ -139,3 +140,28 @@ def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> Kinema
     Holder.drag_coeff = drag_coefficient(Holder.angle_of_attack, K3, K4)
 
     return Holder
+
+
+def define_planar_angular_velocity(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """"""
+    omega_wing = Holder.omega.set_referential(Referential.WING)
+    omega_wing_planar_coords = omega_wing.coords
+    omega_wing_planar_coords[1,:] = 0
+
+    Holder.omega_planar = Vector3D(omega_wing_planar_coords, Referential.WING)
+    
+    return Holder
+
+
+def compute_accelerations(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """"""
+    Holder.u_tip.set_referential(Referential.GLOBAL)
+    Holder.u_tip_dt = vector_time_derivative(Holder.time, Holder.u_tip)
+
+    Holder.omega.set_referential(Referential.GLOBAL)
+    Holder.omega_dt = vector_time_derivative(Holder.time, Holder.omega)
+
+    return Holder
+
+def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    pass

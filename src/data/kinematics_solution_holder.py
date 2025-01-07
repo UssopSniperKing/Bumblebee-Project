@@ -33,6 +33,11 @@ class KinematicsSolutionHolder:
     # Velocities
     omega: Vector3D
     u_tip: Vector3D
+    omega_planar: Vector3D
+
+    # Accelerations
+    omega_dt: Vector3D
+    u_tip_dt: Vector3D
 
     # Aerodynamic coefficients
     lift_coeff: np.array

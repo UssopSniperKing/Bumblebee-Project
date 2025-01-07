@@ -12,7 +12,6 @@ def lift_coefficient(angle_of_attack: Angle, K1: Scalar, K2: Scalar) -> np.array
     angle_2 = Angle(7.2, "deg")
     angle = Angle(angle_1.degrees * angle_of_attack.degrees - angle_2.degrees, "deg")
     
-
     return K1 + K2 * np.sin(angle.radians)
 
 
