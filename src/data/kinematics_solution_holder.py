@@ -50,6 +50,7 @@ class KinematicsSolutionHolder:
     force_RD: Vector3D
     force_AMx: Vector3D
     force_AMz: Vector3D
+    force_QSM: Vector3D
     
     def __init__(self):
         pass

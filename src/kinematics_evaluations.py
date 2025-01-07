@@ -200,4 +200,6 @@ def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder
     Holder.force_AMx = force_AMx(u_tip_dt_wing, ex_global, C_AMX1, C_AMX2)
     Holder.force_AMz = force_AMz(u_tip_dt_wing, omega_dt_wing, ez_global, C_AMZ1, C_AMZ2, C_AMZ3, C_AMZ4, C_AMZ5, C_AMZ6)
 
+    Holder.force_QSM = Holder.force_AMx + Holder.force_AMz + Holder.force_RC + Holder.force_RD + Holder.force_TC + Holder.force_TD
+
     return Holder
