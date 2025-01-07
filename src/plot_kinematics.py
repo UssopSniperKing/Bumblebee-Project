@@ -8,6 +8,9 @@ def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
     plot_u_tip(Holder)
     plot_omega(Holder)
     plot_e_unit(Holder)
+    plot_angle_of_attack(Holder)
+    plot_coefficients(Holder)
+    plot_aero_vectors(Holder)
     plt.show()
 
 
@@ -31,11 +34,19 @@ def plot_angles(Holder: KinematicsSolutionHolder) -> None:
     plt.title('Angles derivatives')
     plt.legend()
 
+def plot_angle_of_attack(Holder):
+
+    plt.figure()
+    plt.plot(Holder.time, Holder.angle_of_attack.degrees, label='AoA')
+    plt.xlabel('Time')
+    plt.ylabel('Angle og Attack')
+    plt.title('Angle of attack')
+    plt.legend()
+
 
 def plot_u_tip(Holder) -> None:
 
     Holder.u_tip.set_referential(Referential.GLOBAL)    
-    print(Holder.u_tip.referential)
     plt.figure()
     plt.plot(Holder.time, Holder.u_tip.coords[0,:], label='u_g_x')
     plt.plot(Holder.time, Holder.u_tip.coords[1,:], label='u_g_y')
@@ -55,10 +66,7 @@ def plot_omega(Holder) -> None:
 
 def plot_e_unit(Holder) -> None:
 
-    print(Holder.ez)
     Holder.ez.set_referential(Referential.GLOBAL)
-    print(Holder.ez)
-
     plt.figure()
     plt.plot(Holder.time, Holder.ez.coords[0,:], label='ez_w_g_x')
     plt.plot(Holder.time, Holder.ez.coords[1,:], label='ez_w_g_y')
@@ -66,6 +74,36 @@ def plot_e_unit(Holder) -> None:
     plt.legend()
     plt.title('ez global')
 
+
+def plot_coefficients(Holder):
+    
+    plt.figure()
+    plt.plot(Holder.angle_of_attack.degrees, Holder.lift_coeff.T, label='CL')
+    plt.plot(Holder.angle_of_attack.degrees, Holder.drag_coeff, label='CD')
+    plt.xlabel('Angle of attack')
+    plt.title('Aerodynamics coefficients')
+    plt.legend()
+   
+def plot_aero_vectors(Holder):
+
+    Holder.e_lift.set_referential(Referential.GLOBAL)
+    Holder.e_drag.set_referential(Referential.GLOBAL)
+    plt.figure()
+    plt.plot(Holder.time, Holder.e_lift.coords[0,:], label='e_lift_g_x')
+    plt.plot(Holder.time, Holder.e_lift.coords[1,:], label='e_lift_g_y')
+    plt.plot(Holder.time, Holder.e_lift.coords[2,:], label='e_lift_g_z')
+    plt.xlabel('time')
+    plt.title('e_lift_g components')
+    plt.legend()
+
+
+    plt.figure()
+    plt.plot(Holder.time, Holder.e_drag.coords[0,:], label='e_drag_g_x')
+    plt.plot(Holder.time, Holder.e_drag.coords[1,:], label='e_drag_g_y')
+    plt.plot(Holder.time, Holder.e_drag.coords[2,:], label='e_drag_g_z')
+    plt.xlabel('time')
+    plt.title('e_drag_g components')
+    plt.legend()
 
 
 #def plot_forces():

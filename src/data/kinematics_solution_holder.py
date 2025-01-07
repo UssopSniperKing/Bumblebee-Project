@@ -27,6 +27,8 @@ class KinematicsSolutionHolder:
     ex: Vector3D
     ey: Vector3D
     ez: Vector3D
+    e_drag: Vector3D
+    e_lift: Vector3D
 
     # Velocities
     omega: Vector3D

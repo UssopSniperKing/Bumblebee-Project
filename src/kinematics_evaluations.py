@@ -92,7 +92,10 @@ def define_aero_unit_vectors(Holder: KinematicsSolutionHolder) -> KinematicsSolu
     u_tip_global = Holder.u_tip.set_referential(Referential.GLOBAL)
     ey_global = Holder.ey.set_referential(Referential.GLOBAL)
     
-    e_drag_global = - normalize(u_tip_global)
+    u_tip_global_opposite_coords = - u_tip_global.coords
+    u_tip_global_opposite = Vector3D(u_tip_global_opposite_coords, Referential.GLOBAL)
+
+    e_drag_global = normalize(u_tip_global_opposite)
     e_lift_global = cross(ey_global, e_drag_global)
 
     sign_alpha = np.sign(Holder.alpha.radians)
@@ -126,10 +129,10 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
 def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """Compute CL and CD"""
 
-    K1 = 0
-    K2 = 0
-    K3 = 0
-    K4 = 0
+    K1 = 1
+    K2 = 1
+    K3 = 1
+    K4 = 1
     # todo : constants needs to find their place in the holder (maybe a dictionnary)
 
     Holder.lift_coeff = lift_coefficient(Holder.angle_of_attack, K1, K2)

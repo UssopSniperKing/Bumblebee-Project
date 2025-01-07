@@ -10,6 +10,7 @@ from kinematics_evaluations import (
     evaluate_tip_velocity,
     compute_angle_of_attack,
     compute_aerodynamic_coefficients,
+    define_aero_unit_vectors
 )
 
 
@@ -29,6 +30,8 @@ def main() -> None:
     Kinematics = compute_angle_of_attack(Kinematics)
 
     Kinematics = compute_aerodynamic_coefficients(Kinematics)
+
+    Kinematics = define_aero_unit_vectors(Kinematics)
 
     plot_kinematics(Kinematics)
 
