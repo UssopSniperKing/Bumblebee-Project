@@ -11,6 +11,8 @@ def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
     plot_angle_of_attack(Holder)
     plot_coefficients(Holder)
     plot_aero_vectors(Holder)
+    plot_u_tip_dt(Holder)
+    plot_omega_dt(Holder)
     plt.show()
 
 
@@ -104,6 +106,25 @@ def plot_aero_vectors(Holder):
     plt.xlabel('time')
     plt.title('e_drag_g components')
     plt.legend()
+
+def plot_u_tip_dt(Holder) -> None:
+
+    Holder.u_tip_dt.set_referential(Referential.WING)    
+    plt.figure()
+    plt.plot(Holder.time, Holder.u_tip_dt.coords[0,:], label='u_dt_w_x')
+    plt.plot(Holder.time, Holder.u_tip_dt.coords[1,:], label='u_dt_w_y')
+    plt.plot(Holder.time, Holder.u_tip_dt.coords[2,:], label='u_dt_w_z')
+    plt.legend()
+
+def plot_omega_dt(Holder) -> None:
+
+    Holder.omega_dt.set_referential(Referential.WING)    
+    plt.figure()
+    plt.plot(Holder.time, Holder.omega_dt.coords[0,:], label='omega_dt_w_x')
+    plt.plot(Holder.time, Holder.omega_dt.coords[1,:], label='omega_dt_w_y')
+    plt.plot(Holder.time, Holder.omega_dt.coords[2,:], label='omega_dt_w_z')
+    plt.legend()
+    plt.title('omega_dt wing')
 
 
 #def plot_forces():
