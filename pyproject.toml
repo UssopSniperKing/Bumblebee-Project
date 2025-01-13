@@ -1,0 +1,17 @@
+[project]
+name = "Bumblebee-Project"
+version = "0.1.0"
+description = "A project about the flying model of a bumblebee."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.0",
+    "numpy>=2.2.1",
+    "pyqt5>=5.15.11",
+    "pytest>=8.3.4",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "."
+]
