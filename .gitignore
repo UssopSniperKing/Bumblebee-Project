@@ -2,6 +2,9 @@
 src/tests/__pycache__
 src/tests/.pytest_cache
 
+# Dossiers de sortie
+figures/
+
 # Environnements virtuels
 venv/
 env/

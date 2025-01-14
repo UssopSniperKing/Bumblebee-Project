@@ -1,8 +1,9 @@
 from data import KinematicsSolutionHolder
 import matplotlib.pyplot as plt
 from core import Referential
+from pathlib import Path
 
-def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
+def plot_kinematics(Holder: KinematicsSolutionHolder, save_fig: bool, show_fig: bool) -> None:
    
     plot_angles(Holder)
     plot_u_tip(Holder)
@@ -14,7 +15,22 @@ def plot_kinematics(Holder: KinematicsSolutionHolder) -> None:
     plot_u_tip_dt(Holder)
     plot_omega_dt(Holder)
     plot_forces(Holder)
-    plt.show()
+
+    if save_fig:
+        save_figures()
+    
+    if show_fig:
+        plt.show()
+
+
+def save_figures() -> None:
+
+    figures_path = Path(__file__).parent.parent / "figures"
+    figures_path.mkdir(exist_ok=True)
+
+    for i in plt.get_fignums():
+        plt.figure(i)
+        plt.savefig(figures_path / f"Figure_{i}.png")
 
 
 def plot_angles(Holder: KinematicsSolutionHolder) -> None:

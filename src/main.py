@@ -20,7 +20,11 @@ from kinematics_evaluations import (
 def main() -> None:
     """Main function"""
     NUMBER_TIME_STEPS = 400
+    SHOW_FIGURES = False
+    SAVE_FIGURES = True
+
     Kinematics = KinematicsSolutionHolder()
+
     Kinematics = evaluate_angles_kinematics(NUMBER_TIME_STEPS, Kinematics)
     initialize_transformations(Kinematics)
 
@@ -42,7 +46,7 @@ def main() -> None:
 
     Kinematics = compute_forces(Kinematics)
     
-    plot_kinematics(Kinematics)
+    plot_kinematics(Kinematics, SAVE_FIGURES, SHOW_FIGURES)
 
 
 if __name__ == "__main__":
