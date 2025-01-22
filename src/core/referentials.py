@@ -5,7 +5,7 @@ from .transform_func import (
     stroke_to_wing_matrix,
     global_to_body_matrix,
     global_to_wing_matrix,
-    get_rotation_matrix_y,
+    body_to_stroke_matrix,
     transpose
 )
 
@@ -47,7 +47,7 @@ class Transformations:
             (Referential.STROKE, Referential.WING): stroke_to_wing_matrix(phi, alpha, theta),
             (Referential.GLOBAL, Referential.BODY): global_to_body_matrix(psi, beta, gamma),
             (Referential.GLOBAL, Referential.WING): global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma),
-            (Referential.BODY, Referential.STROKE): get_rotation_matrix_y(eta)
+            (Referential.BODY, Referential.STROKE): body_to_stroke_matrix(eta)
         }
         Transformations._is_initialized = True
 

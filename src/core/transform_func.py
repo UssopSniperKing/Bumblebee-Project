@@ -157,6 +157,50 @@ def stroke_to_wing_matrix(phi: Angle, alpha: Angle, theta: Angle) -> np.ndarray:
 
     return output_matrix
 
+def body_to_stroke_matrix(eta: Angle) -> np.ndarray:
+    """
+
+    Args:
+        eta (Angle): Rotation around the z-axis.
+
+    Raises:
+        ValueError: If the angles are not Angle objects or if the angles arrays are not of the same length.
+
+    Returns:
+        np.ndarray: Rotation matrix of shape (3,3) or (3,3,N) depending on the number of angles.
+    """
+
+    # check if the angles are Angle objects
+    if not isinstance(eta, Angle):
+        raise ValueError("Eta must be an Angle object")
+
+    length_eta = len(eta)
+
+    if length_eta > 1:
+        angle_pi = np.ones(length_eta) * np.pi
+        angle_pi = Angle(angle_pi, "rad")
+    else:
+        angle_pi = Angle(np.pi, "rad")
+
+    # get the rotation matrices, at this point all matrices are of shape (3,3,max_len)
+    # and max_len is either 1 or the length of the angles
+    Rx = get_rotation_matrix_x(angle_pi)
+    Ry = get_rotation_matrix_y(eta)
+
+    if length_eta == 1:
+        output_matrix = Rx @ Ry
+    else:
+        output_matrix = np.empty((3, 3, length_eta))
+
+        # Use np.einsum with a single string to handle all indices directly
+        #output_matrix = np.einsum("ijn,jkn,kln->iln", Ry, Rz, Rx, optimize=True)
+
+        # equivalent to the following loop but way faster
+        for i in range(length_eta):
+           output_matrix[:, :, i] = Rx[:, :, i] @ Ry[:, :, i]
+
+    return output_matrix
+
 
 def global_to_body_matrix(psi: Angle, beta: Angle, gamma: Angle) -> np.ndarray:
     """Get the rotation matrix from the global referential to the body referential.
@@ -271,7 +315,7 @@ def global_to_wing_matrix(phi, alpha, theta, eta, psi, beta, gamma) -> np.ndarra
     # and max_len is either 1 or the length of the angles
     R_s2w = stroke_to_wing_matrix(phi_broadcasted, alpha_broadcasted, theta_broadcasted)
     R_g2b = global_to_body_matrix(psi_broadcasted, beta_broadcasted, gamma_broadcasted)
-    R_b2s = get_rotation_matrix_y(eta_broadcasted)
+    R_b2s = body_to_stroke_matrix(eta_broadcasted)
 
     if max_len == 1:
         output_matrix = R_s2w @ R_b2s @ R_g2b

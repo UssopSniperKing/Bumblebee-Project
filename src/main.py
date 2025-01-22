@@ -34,11 +34,11 @@ def main() -> None:
 
     Kinematics = evaluate_tip_velocity(Kinematics)
 
+    Kinematics = define_aero_unit_vectors(Kinematics)
+
     Kinematics = compute_angle_of_attack(Kinematics)
 
     Kinematics = compute_aerodynamic_coefficients(Kinematics)
-
-    Kinematics = define_aero_unit_vectors(Kinematics)
 
     Kinematics = define_planar_angular_velocity(Kinematics)
 

@@ -15,6 +15,7 @@ def plot_kinematics(Holder: KinematicsSolutionHolder, save_fig: bool, show_fig: 
     plot_u_tip_dt(Holder)
     plot_omega_dt(Holder)
     plot_forces(Holder)
+    plot_omega_planar_square(Holder)
 
     if save_fig:
         save_figures()
@@ -157,4 +158,14 @@ def plot_forces(Holder):
     plt.ylabel('Force')
     plt.title('Vertical components of forces in global coordinate system')
     plt.legend()
-#def plot_forces():
+
+def plot_omega_planar_square(Holder: KinematicsSolutionHolder):
+
+    Holder.omega_planar.set_referential(Referential.GLOBAL)
+
+    plt.figure()
+    plt.plot(Holder.time, Holder.omega_planar.norm() ** 2)
+
+    plt.figure()
+    plt.plot(Holder.time, Holder.lift_coeff)
+    plt.plot(Holder.time, Holder.drag_coeff)

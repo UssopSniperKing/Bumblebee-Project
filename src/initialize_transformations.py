@@ -1,15 +1,16 @@
 from data import KinematicsSolutionHolder
 from core import Transformations
 from core import Angle
+import numpy as np
 
 def initialize_transformations(Holder: KinematicsSolutionHolder) -> None:
     
     # Initialize some of the angles to zero, this may change 
     # and another implementation may be used.
-    Holder.eta = Angle(0.0, "rad")
+    Holder.eta = Angle(-90, "deg")
     Holder.psi = Angle(0.0, "rad")
     Holder.beta = Angle(0.0, "rad")
-    Holder.gamma = Angle(0.0, "rad")
+    Holder.gamma = Angle(180, "deg")
 
     angles = {
         "phi": Holder.phi,

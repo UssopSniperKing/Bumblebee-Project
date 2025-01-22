@@ -10,6 +10,7 @@ from core import normalize
 from core import Angle
 import numpy as np
 from forces_model import force_RC, force_AMx, force_AMz, force_RD, force_TC, force_TD
+from core import dot
 
 def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """Evaluate the kinematics of the bumblebee model
@@ -21,7 +22,12 @@ def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutio
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-    Holder.time, Holder.alpha, Holder.phi, Holder.theta = bumblebee_kinematics_model(number_time_steps)
+    Holder.time, alpha, phi, theta = bumblebee_kinematics_model(number_time_steps)
+
+    Holder.alpha = Angle(-alpha.radians, "rad")
+    Holder.phi = Angle(-phi.radians, "rad")
+    Holder.theta = theta
+
     Holder.alpha_dt = angle_time_derivative(Holder.time, Holder.alpha)
     Holder.phi_dt = angle_time_derivative(Holder.time, Holder.phi)
     Holder.theta_dt = angle_time_derivative(Holder.time, Holder.theta)
@@ -122,7 +128,12 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
     omega_wing_y = omega_wing.coords[1,:]
     omega_wing_z = omega_wing.coords[2,:]
 
-    aoa = np.atan2( -omega_wing_y, -omega_wing_z )
+    ex_wing = Holder.ex.set_referential(Referential.GLOBAL)
+    e_drag = Holder.e_drag.set_referential(Referential.GLOBAL)
+    minus_e_drag = Vector3D(-e_drag.coords, Referential.GLOBAL)
+
+    #aoa = np.atan2( -omega_wing_y, -omega_wing_z )
+    aoa = np.arccos(dot(ex_wing, minus_e_drag))
     Holder.angle_of_attack = Angle(aoa, "rad")
 
     return Holder
@@ -131,10 +142,10 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
 def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """Compute CL and CD"""
 
-    K1 = 1
-    K2 = 1
-    K3 = 1
-    K4 = 1
+    K1 = -0.2083
+    K2 = 0.4193
+    K3 = 0.2509
+    K4 = -0.2656
     # todo : constants needs to find their place in the holder (maybe a dictionnary)
 
     Holder.lift_coeff = lift_coefficient(Holder.angle_of_attack, K1, K2)
@@ -150,7 +161,7 @@ def define_planar_angular_velocity(Holder: KinematicsSolutionHolder) -> Kinemati
     omega_wing_planar_coords[1,:] = 0
 
     Holder.omega_planar = Vector3D(omega_wing_planar_coords, Referential.WING)
-    
+
     return Holder
 
 
@@ -167,18 +178,18 @@ def compute_accelerations(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
 def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """"""
 
-    C_RC = 1
-    C_RD = 1
+    C_RC = 0.0972
+    C_RD = 0.0626
     
-    C_AMX1 = 1
-    C_AMX2 = 1
+    C_AMX1 = -0.0045
+    C_AMX2 = 0.0017
 
-    C_AMZ1 = 1
-    C_AMZ2 = 1
-    C_AMZ3 = 1
-    C_AMZ4 = 1
-    C_AMZ5 = 1
-    C_AMZ6 = 1
+    C_AMZ1 = 0.0211
+    C_AMZ2 = 0.0422
+    C_AMZ3 = 0.1479
+    C_AMZ4 = -0.1697
+    C_AMZ5 = -0.0063
+    C_AMZ6 = 0.0242
 
     omega_planar_wing = Holder.omega_planar.set_referential(Referential.WING)
     e_lift_global = Holder.e_lift.set_referential(Referential.GLOBAL)
