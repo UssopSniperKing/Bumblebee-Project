@@ -204,20 +204,3 @@ class Vector3D:
             np.ndarray: Array of coordinates.
         """
         return self.coords if dtype is None else self.coords.astype(dtype)
-
-    # Intégration avec les ufuncs NumPy
-    def __array_ufunc__(self, ufunc: UFunc, method, *inputs, **kwargs):
-        """
-        Permet l'utilisation directe des ufuncs NumPy comme np.sin ou np.linalg.norm.
-
-        Parameters:
-            ufunc: La ufunc NumPy (par ex. np.sin, np.exp).
-            method: Méthode appelée sur la ufunc.
-            inputs: Entrées passées à la ufunc.
-            kwargs: Arguments additionnels.
-        """
-        coords = [arg.coords if isinstance(arg, Vector3D) else arg for arg in inputs]
-        result = getattr(ufunc, method)(*coords, **kwargs)
-        if isinstance(result, np.ndarray) and result.ndim >= 2 and result.shape[0] == 3:
-            return Vector3D(result, referential=self.referential)
-        return result

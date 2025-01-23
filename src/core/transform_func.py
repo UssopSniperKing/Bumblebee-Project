@@ -195,6 +195,7 @@ def body_to_stroke_matrix(eta: Angle) -> np.ndarray:
         # Use np.einsum with a single string to handle all indices directly
         #output_matrix = np.einsum("ijn,jkn,kln->iln", Ry, Rz, Rx, optimize=True)
 
+        # I reverted here because the einsum was done with 3 matrices and now we have 2
         # equivalent to the following loop but way faster
         for i in range(length_eta):
            output_matrix[:, :, i] = Rx[:, :, i] @ Ry[:, :, i]
