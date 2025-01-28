@@ -1,20 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from data import KinematicsSolutionHolder
-from initialize_transformations import initialize_transformations
 from plot_kinematics import plot_kinematics
-from kinematics_evaluations import (
-    evaluate_angles_kinematics,
-    define_unit_vectors,
-    evaluate_angular_velocity,
-    evaluate_tip_velocity,
-    compute_angle_of_attack,
-    compute_aerodynamic_coefficients,
-    define_aero_unit_vectors,
-    define_planar_angular_velocity,
-    compute_accelerations,
-    compute_forces
-)
+from kinematics_evaluations import evaluate_angles_kinematics
+from workflows import (normal_workflow, optimization_workflow)
 
 
 def main() -> None:
@@ -22,31 +11,22 @@ def main() -> None:
     NUMBER_TIME_STEPS = 400
     SHOW_FIGURES = False
     SAVE_FIGURES = True
+    USE_OPTIMIZATION = False
 
     Kinematics = KinematicsSolutionHolder()
 
-    Kinematics = evaluate_angles_kinematics(NUMBER_TIME_STEPS, Kinematics)
-    initialize_transformations(Kinematics)
 
-    Kinematics = define_unit_vectors(Kinematics)
+    if not USE_OPTIMIZATION:
 
-    Kinematics = evaluate_angular_velocity(Kinematics)
+        
+        Kinematics = evaluate_angles_kinematics(NUMBER_TIME_STEPS, Kinematics)
+        Kinematics = normal_workflow(Kinematics)
+        plot_kinematics(Kinematics, SAVE_FIGURES, SHOW_FIGURES)
 
-    Kinematics = evaluate_tip_velocity(Kinematics)
+    else:
 
-    Kinematics = define_aero_unit_vectors(Kinematics)
-
-    Kinematics = compute_angle_of_attack(Kinematics)
-
-    Kinematics = compute_aerodynamic_coefficients(Kinematics)
-
-    Kinematics = define_planar_angular_velocity(Kinematics)
-
-    Kinematics = compute_accelerations(Kinematics)
-
-    Kinematics = compute_forces(Kinematics)
-    
-    plot_kinematics(Kinematics, SAVE_FIGURES, SHOW_FIGURES)
+        Kinematics = optimization_workflow(Kinematics, NUMBER_TIME_STEPS)
+        plot_kinematics(Kinematics, SAVE_FIGURES, SHOW_FIGURES)
 
 
 if __name__ == "__main__":

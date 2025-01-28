@@ -12,7 +12,7 @@ import numpy as np
 from forces_model import force_RC, force_AMx, force_AMz, force_RD, force_TC, force_TD
 from core import dot
 
-def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutionHolder, PHI: float = None) -> KinematicsSolutionHolder:
     """Evaluate the kinematics of the bumblebee model
 
     Args:
@@ -22,7 +22,11 @@ def evaluate_angles_kinematics(number_time_steps: int, Holder: KinematicsSolutio
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-    Holder.time, alpha, phi, theta = bumblebee_kinematics_model(number_time_steps)
+
+    if PHI is None:
+        Holder.time, alpha, phi, theta = bumblebee_kinematics_model(number_time_steps)
+    else:
+        Holder.time, alpha, phi, theta = bumblebee_kinematics_model(number_time_steps, PHI=PHI)
 
     Holder.alpha = Angle(-alpha.radians, "rad")
     Holder.phi = Angle(-phi.radians, "rad")
@@ -124,15 +128,10 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
     Returns:
         KinematicsSolutionHolder: Holder for the kinematic solution
     """
-    omega_wing = Holder.omega.set_referential(Referential.WING)
-    omega_wing_y = omega_wing.coords[1,:]
-    omega_wing_z = omega_wing.coords[2,:]
-
     ex_wing = Holder.ex.set_referential(Referential.GLOBAL)
     e_drag = Holder.e_drag.set_referential(Referential.GLOBAL)
     minus_e_drag = Vector3D(-e_drag.coords, Referential.GLOBAL)
 
-    #aoa = np.atan2( -omega_wing_y, -omega_wing_z )
     aoa = np.arccos(dot(ex_wing, minus_e_drag))
     Holder.angle_of_attack = Angle(aoa, "rad")
 
@@ -141,11 +140,16 @@ def compute_angle_of_attack(Holder: KinematicsSolutionHolder) -> KinematicsSolut
 
 def compute_aerodynamic_coefficients(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """Compute CL and CD"""
-
-    K1 = -0.2083
-    K2 = 0.4193
-    K3 = 0.2509
-    K4 = -0.2656
+    
+    # K1 = -0.2083
+    # K2 = 0.4193
+    # K3 = 0.2509
+    # K4 = -0.2656
+    
+    K1 = 1
+    K2 = 1
+    K3 = 1
+    K4 = 1
     # todo : constants needs to find their place in the holder (maybe a dictionnary)
 
     Holder.lift_coeff = lift_coefficient(Holder.angle_of_attack, K1, K2)
@@ -178,18 +182,31 @@ def compute_accelerations(Holder: KinematicsSolutionHolder) -> KinematicsSolutio
 def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
     """"""
 
-    C_RC = 0.0972
-    C_RD = 0.0626
+    # C_RC = 0.0972
+    # C_RD = 0.0626
     
-    C_AMX1 = -0.0045
-    C_AMX2 = 0.0017
+    # C_AMX1 = -0.0045
+    # C_AMX2 = 0.0017
 
-    C_AMZ1 = 0.0211
-    C_AMZ2 = 0.0422
-    C_AMZ3 = 0.1479
-    C_AMZ4 = -0.1697
-    C_AMZ5 = -0.0063
-    C_AMZ6 = 0.0242
+    # C_AMZ1 = 0.0211
+    # C_AMZ2 = 0.0422
+    # C_AMZ3 = 0.1479
+    # C_AMZ4 = -0.1697
+    # C_AMZ5 = -0.0063
+    # C_AMZ6 = 0.0242
+
+    C_RC = 1
+    C_RD = 1
+    
+    C_AMX1 = 1
+    C_AMX2 = 1
+
+    C_AMZ1 = 1
+    C_AMZ2 = 1
+    C_AMZ3 = 1
+    C_AMZ4 = 1
+    C_AMZ5 = 1
+    C_AMZ6 = 1
 
     omega_planar_wing = Holder.omega_planar.set_referential(Referential.WING)
     e_lift_global = Holder.e_lift.set_referential(Referential.GLOBAL)
@@ -212,5 +229,18 @@ def compute_forces(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder
     Holder.force_AMz = force_AMz(u_tip_dt_wing, omega_dt_wing, ez_global, C_AMZ1, C_AMZ2, C_AMZ3, C_AMZ4, C_AMZ5, C_AMZ6)
 
     Holder.force_QSM = Holder.force_AMx + Holder.force_AMz + Holder.force_RC + Holder.force_RD + Holder.force_TC + Holder.force_TD
+
+    return Holder
+
+
+def evaluate_power(Holder: KinematicsSolutionHolder) -> KinematicsSolutionHolder:
+    """"""
+
+    position_vector = Vector3D([-0.26,0.59,0], Referential.WING)
+
+    force_QSM = Holder.force_QSM.set_referential(Referential.WING)
+    omega_wing = Holder.omega.set_referential(Referential.WING)
+
+    Holder.power = - dot( cross(position_vector, force_QSM), omega_wing)
 
     return Holder

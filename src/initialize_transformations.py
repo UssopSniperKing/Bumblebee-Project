@@ -1,7 +1,6 @@
 from data import KinematicsSolutionHolder
 from core import Transformations
 from core import Angle
-import numpy as np
 
 def initialize_transformations(Holder: KinematicsSolutionHolder) -> None:
     

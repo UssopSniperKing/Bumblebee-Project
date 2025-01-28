@@ -16,6 +16,7 @@ def plot_kinematics(Holder: KinematicsSolutionHolder, save_fig: bool, show_fig: 
     plot_omega_dt(Holder)
     plot_forces(Holder)
     plot_omega_planar_square(Holder)
+    plot_power(Holder)
 
     if save_fig:
         save_figures()
@@ -158,6 +159,15 @@ def plot_forces(Holder):
     plt.ylabel('Force')
     plt.title('Vertical components of forces in global coordinate system')
     plt.legend()
+
+def plot_power(Holder: KinematicsSolutionHolder):
+    plt.figure()
+    plt.plot(Holder.time, Holder.power, label='power')
+    plt.xlabel('Time')
+    plt.ylabel('P')
+    plt.title('Power')
+    plt.legend()
+
 
 def plot_omega_planar_square(Holder: KinematicsSolutionHolder):
 
